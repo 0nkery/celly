@@ -1,10 +1,12 @@
-mod sequential;
-
 use grid::Grid;
 
+mod sequential;
 use self::sequential::Sequential;
 
 pub trait Engine {
-    fn new<T: Grid + Iterator>(grid: T) -> Self;
-    fn run(&self);
+    type Grid: Grid;
+
+    fn new(grid: Self::Grid) -> Self;
+
+    fn run_times(&self, times: i64);
 }
