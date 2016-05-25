@@ -1,6 +1,10 @@
+mod sequential;
+
 use grid::Grid;
 
+use self::sequential::Sequential;
+
 pub trait Engine {
-    fn set_grid<T: Grid>(&self, grid: T);
+    fn new<T: Grid + Iterator>(grid: T) -> Self;
     fn run(&self);
 }
