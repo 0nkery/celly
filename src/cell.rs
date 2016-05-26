@@ -1,3 +1,3 @@
 pub trait Cell {
-    fn step<T: Cell>(&self, neighbors: &mut [T]);
+    fn step<C: Cell>(&self, neighbors: &[C]);
 }
