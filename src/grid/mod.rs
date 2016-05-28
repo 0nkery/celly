@@ -1,5 +1,5 @@
-mod square;
-use self::square::SquareGrid;
+pub mod square;
+
 
 pub trait Grid {
     fn step(&self);
