@@ -48,27 +48,25 @@ impl<C: Cell + Clone> MooreSquareGrid<C> {
 
             for serial in 0 .. NEIGHBORS_COUNT {
 
-                let neighbor_index: i32;
+                let neighbor_index: Option<i32>;
 
                 {
                     let offset = offset as i32;
                     let serial = serial as i32;
 
                     neighbor_index = match serial {
-                        i @ 0 ... 2 => offset - cols - (i - 1),
-                        3 => offset - 1,
-                        4 => offset + 1,
-                        i @ 5 ... 7 => offset + cols - (i - 1),
-                        // such values will be ignored later
-                        _ => len
+                        i @ 0 ... 2 => Some(offset - cols - (i - 1)),
+                        3 => Some(offset - 1),
+                        4 => Some(offset + 1),
+                        i @ 5 ... 7 => Some(offset + cols - (i - 1)),
+                        _ => None
                     };
                 }
 
-                if neighbor_index >= 0 && neighbor_index < len {
-                    self.neighbors[offset][serial] = Some(cell.clone());
-                }
-                else {
-                    self.neighbors[offset][serial] = None;
+                if let Some(index) = neighbor_index {
+                    if index >= 0 && index < len {
+                        self.neighbors[offset][serial] = Some(cell.clone());
+                    }
                 }
             }
         }
