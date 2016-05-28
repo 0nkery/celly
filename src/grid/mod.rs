@@ -1,6 +1,6 @@
-pub mod square;
+pub mod square_moore;
 
 
 pub trait Grid {
-    fn step(&self);
+    fn step(&mut self);
 }

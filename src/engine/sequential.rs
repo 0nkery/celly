@@ -14,7 +14,7 @@ impl<G: Grid> Engine for Sequential<G> {
         Sequential { grid: grid }
     }
 
-    fn run_times(&self, times: i64) {
+    fn run_times(&mut self, times: i64) {
         for _ in 0..times {
             self.grid.step();
         }

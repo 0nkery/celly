@@ -7,7 +7,7 @@ pub trait Engine {
     type Grid: Grid;
 
     fn new(grid: Self::Grid) -> Self;
-    fn run_times(&self, times: i64);
+    fn run_times(&mut self, times: i64);
 }
 
 
