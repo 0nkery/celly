@@ -80,7 +80,7 @@ impl<C: Cell + Copy> SquareGrid<C> {
         }
     }
 
-    fn neighbors_iter<'a>(&self, 
+    fn neighbors_iter<'a>(&self,
                           cells: &'a Vec<C>,
                           neighbors: Neighbors)
         -> MooreSquareGridIterator<'a, C> {
