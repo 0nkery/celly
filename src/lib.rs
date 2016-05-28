@@ -15,6 +15,7 @@ mod test {
     }
 
     /// Implementation of Conway's Game of Life.
+
     #[derive(Copy, Clone)]
     struct Life {
         state: LifeState
