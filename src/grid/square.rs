@@ -8,7 +8,7 @@ const NEIGHBORS_COUNT: usize = 8;
 
 type Neighbors<C> = [Option<Rc<C>>; NEIGHBORS_COUNT];
 
-pub struct SquareGrid<C: Cell> {
+pub struct MooreSquareGrid<C: Cell> {
     cells: Vec<Rc<C>>,
     neighbors: Vec<Neighbors<C>>,
     rows: usize,
@@ -16,7 +16,7 @@ pub struct SquareGrid<C: Cell> {
 }
 
 
-impl<C: Cell + Clone> SquareGrid<C> {
+impl<C: Cell + Clone> MooreSquareGrid<C> {
 
     pub fn new(rows: usize, cols: usize, initial: C) -> Self {
 
@@ -24,7 +24,7 @@ impl<C: Cell + Clone> SquareGrid<C> {
         let cells = vec![Rc::new(initial); len];
         let neighbors = Vec::with_capacity(len);
 
-        let mut grid = SquareGrid {
+        let mut grid = MooreSquareGrid {
             cells: cells,
             neighbors: neighbors,
             rows: rows,
@@ -76,6 +76,6 @@ impl<C: Cell + Clone> SquareGrid<C> {
 }
 
 
-impl<C: Cell> Grid for SquareGrid<C> {
+impl<C: Cell> Grid for MooreSquareGrid<C> {
     fn step(&self) {}
 }
