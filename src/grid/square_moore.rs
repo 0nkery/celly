@@ -1,5 +1,6 @@
-use grid::Grid;
-use cell::Cell;
+use traits::Grid;
+use traits::Cell;
+use repr::CellRepr;
 
 
 const NEIGHBORS_COUNT: usize = 8;
@@ -7,16 +8,17 @@ const NEIGHBORS_COUNT: usize = 8;
 type Neighbors = [Option<usize>; NEIGHBORS_COUNT];
 
 
-pub struct SquareGrid<C: Cell + Copy> {
+pub struct SquareGrid<'a, C: Cell + Copy> {
     cells: Vec<C>,
     old_cells: Vec<C>,
     neighbors: Vec<Neighbors>,
+    cell_reprs: Vec<CellRepr<'a>>,
     rows: i32,
     cols: i32,
 }
 
 
-impl<C: Cell + Copy> SquareGrid<C> {
+impl<'a, C: Cell + Copy> SquareGrid<'a, C> {
 
     pub fn new(rows: i32, cols: i32, initial: C) -> Self {
 
@@ -24,15 +26,19 @@ impl<C: Cell + Copy> SquareGrid<C> {
         let cells = vec![initial; len];
         let old_cells = Vec::new();
         let neighbors = Vec::with_capacity(len);
+        let cell_reprs = Vec::with_capacity(len);
 
         let mut grid = SquareGrid {
             cells: cells,
             old_cells: old_cells,
             neighbors: neighbors,
+            cell_reprs: cell_reprs,
             rows: rows,
             cols: cols,
         };
+
         grid.init_neighbors();
+        grid.init_cell_reprs();
 
         grid
     }
@@ -47,6 +53,21 @@ impl<C: Cell + Copy> SquareGrid<C> {
         let col = offset % self.cols;
         let row = (offset - col) / self.rows;
         (row, col)
+    }
+
+    fn init_cell_reprs(&mut self) {
+
+        let len = self.cells.len();
+
+        for offset in 0 .. len {
+            let (x, y) = self.from_offset(offset as i32);
+            let mut repr = CellRepr::new(x, y);
+            let cell = self.cells[offset];
+
+            cell.repr(&mut repr.state);
+
+            self.cell_reprs.push(repr);
+        }
     }
 
     /// 0 | 1 | 2
@@ -80,10 +101,10 @@ impl<C: Cell + Copy> SquareGrid<C> {
         }
     }
 
-    fn neighbors_iter<'a>(&self,
-                          cells: &'a Vec<C>,
+    fn neighbors_iter<'b>(&self,
+                          cells: &'b Vec<C>,
                           neighbors: Neighbors)
-        -> MooreSquareGridIterator<'a, C> {
+        -> MooreSquareGridIterator<'b, C> {
 
         MooreSquareGridIterator {
             cells: cells,
@@ -94,7 +115,7 @@ impl<C: Cell + Copy> SquareGrid<C> {
 }
 
 
-impl<C: Cell + Copy> Grid for SquareGrid<C> {
+impl<'a, C: Cell + Copy> Grid for SquareGrid<'a, C> {
 
     fn step(&mut self) {
         self.old_cells = self.cells.clone();
@@ -104,6 +125,10 @@ impl<C: Cell + Copy> Grid for SquareGrid<C> {
             let neighbors_iter = self.neighbors_iter(&self.old_cells, neighbors);
             self.cells[cell_no] = cell.step(neighbors_iter);
         }
+    }
+
+    fn repr(&self) -> &Vec<CellRepr> {
+        &self.cell_reprs
     }
 }
 
@@ -136,10 +161,13 @@ impl<'a, C: Cell> Iterator for MooreSquareGridIterator<'a, C> {
 }
 
 
+#[cfg(test)]
 mod test {
 
-    use cell::Cell;
-    use grid::Grid;
+    use std::collections::HashMap;
+
+    use traits::Cell;
+    use traits::Grid;
 
     #[derive(Copy, Clone, PartialEq, Debug)]
     struct MooreTestCell;
@@ -174,6 +202,8 @@ mod test {
 
             self.clone()
         }
+
+        fn repr(&self, _: &mut HashMap<&str, &str>) {}
     }
 
     #[test]
