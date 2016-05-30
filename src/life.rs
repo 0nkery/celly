@@ -74,11 +74,11 @@ impl Cell for Life {
     fn step<'a, I>(&self, neighbors: I) -> Self 
         where I: Iterator<Item=Option<&'a Self>> {
 
-        let alive = self.alive_count(neighbors);
+        let alive_count = self.alive_count(neighbors);
 
         let new_state = match self.state {
-            LifeState::Alive => self.alive_state(alive),
-            LifeState::Dead => self.dead_state(alive)
+            LifeState::Alive => self.alive_state(alive_count),
+            LifeState::Dead => self.dead_state(alive_count)
         };
 
         let mut new_cell = self.clone();
