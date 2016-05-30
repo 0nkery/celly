@@ -1,6 +1,7 @@
 use traits::Grid;
 use traits::Cell;
 use repr::CellRepr;
+use repr::GridRepr;
 
 
 const NEIGHBORS_COUNT: usize = 8;
@@ -8,31 +9,32 @@ const NEIGHBORS_COUNT: usize = 8;
 type Neighbors = [Option<usize>; NEIGHBORS_COUNT];
 
 
-pub struct SquareGrid<'a, C: Cell + Copy> {
+pub struct SquareGrid<'a, C: Cell + Clone + Default> {
     cells: Vec<C>,
     old_cells: Vec<C>,
     neighbors: Vec<Neighbors>,
-    cell_reprs: Vec<CellRepr<'a>>,
+    repr: GridRepr<'a>,
     rows: i32,
     cols: i32,
 }
 
 
-impl<'a, C: Cell + Copy> SquareGrid<'a, C> {
+impl<'a, C: Cell + Clone + Default> SquareGrid<'a, C> {
 
-    pub fn new(rows: i32, cols: i32, initial: C) -> Self {
+    pub fn new(rows: i32, cols: i32) -> Self {
 
         let len = (rows * cols) as usize;
-        let cells = vec![initial; len];
-        let old_cells = Vec::new();
+
+        let cells = vec![C::default(); len];
+        let old_cells = Vec::with_capacity(len);
         let neighbors = Vec::with_capacity(len);
-        let cell_reprs = Vec::with_capacity(len);
+        let repr = GridRepr::new(rows, cols, None);
 
         let mut grid = SquareGrid {
             cells: cells,
             old_cells: old_cells,
             neighbors: neighbors,
-            cell_reprs: cell_reprs,
+            repr: repr,
             rows: rows,
             cols: cols,
         };
@@ -61,12 +63,11 @@ impl<'a, C: Cell + Copy> SquareGrid<'a, C> {
 
         for offset in 0 .. len {
             let (x, y) = self.from_offset(offset as i32);
-            let mut repr = CellRepr::new(x, y);
-            let cell = self.cells[offset];
+            let mut repr = CellRepr::new(x, y, None);
+            let ref cell = self.cells[offset];
 
             cell.repr(&mut repr.state);
-
-            self.cell_reprs.push(repr);
+            self.repr.cells.push(repr);
         }
     }
 
@@ -115,7 +116,7 @@ impl<'a, C: Cell + Copy> SquareGrid<'a, C> {
 }
 
 
-impl<'a, C: Cell + Copy> Grid for SquareGrid<'a, C> {
+impl<'a, C: Cell + Clone + Default> Grid for SquareGrid<'a, C> {
 
     fn step(&mut self) {
         self.old_cells = self.cells.clone();
@@ -123,12 +124,36 @@ impl<'a, C: Cell + Copy> Grid for SquareGrid<'a, C> {
         for (cell_no, cell) in self.old_cells.iter().enumerate() {
             let neighbors = self.neighbors[cell_no];
             let neighbors_iter = self.neighbors_iter(&self.old_cells, neighbors);
-            self.cells[cell_no] = cell.step(neighbors_iter);
+
+            let new_cell = cell.step(neighbors_iter);
+
+            // update representation
+            let ref mut cell_repr = self.repr.cells[cell_no];
+            new_cell.repr(&mut cell_repr.state);
+
+            self.cells[cell_no] = new_cell;
         }
     }
 
-    fn repr(&self) -> &Vec<CellRepr> {
-        &self.cell_reprs
+    fn repr(&self) -> &GridRepr {
+        &self.repr
+    }
+
+    fn from_repr<'b: 'c, 'c>(&'b mut self, repr: &GridRepr<'c>) {
+
+        if repr.rows != self.rows || repr.cols != self.cols {
+            panic!("Mismatched rows and cols on saved representation.");
+        }
+
+        for i in 0 .. self.cells.len() {
+
+            let ref mut cell = self.cells[i];
+            let ref outer_repr = repr.cells[i];
+            cell.from_repr(&outer_repr.state);
+
+            let ref mut inner_repr = self.repr.cells[i];
+            cell.repr(&mut inner_repr.state);
+        }
     }
 }
 
@@ -169,7 +194,9 @@ mod test {
     use traits::Cell;
     use traits::Grid;
 
-    #[derive(Copy, Clone, PartialEq, Debug)]
+    use super::SquareGrid;
+
+    #[derive(Clone, PartialEq, Debug)]
     struct MooreTestCell;
 
     impl Cell for MooreTestCell {
@@ -204,12 +231,17 @@ mod test {
         }
 
         fn repr(&self, _: &mut HashMap<&str, &str>) {}
+        fn from_repr(&mut self, _: &HashMap<&str, &str>) {}
+    }
+
+    impl Default for MooreTestCell {
+
+        fn default() -> Self { MooreTestCell }
     }
 
     #[test]
     fn test_neighbors() {
-        let initial = MooreTestCell;
-        let mut grid = super::SquareGrid::new(2, 2, initial);
+        let mut grid: SquareGrid<MooreTestCell> = SquareGrid::new(2, 2);
         grid.step();
     }
 }
