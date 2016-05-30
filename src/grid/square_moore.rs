@@ -195,6 +195,7 @@ mod test {
     use traits::Grid;
 
     use super::SquareGrid;
+    use super::NEIGHBORS_COUNT;
 
     #[derive(Clone, PartialEq, Debug)]
     struct MooreTestCell;
@@ -223,7 +224,7 @@ mod test {
                 total += 1;
             }
 
-            assert_eq!(total, super::NEIGHBORS_COUNT);
+            assert_eq!(total, NEIGHBORS_COUNT);
             assert_eq!(none_cnt, 5);
             assert_eq!(neighbors_cnt, 3);
 
