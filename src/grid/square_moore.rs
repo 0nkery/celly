@@ -197,7 +197,7 @@ mod test {
     use super::SquareGrid;
     use super::NEIGHBORS_COUNT;
 
-    #[derive(Clone, PartialEq, Debug)]
+    #[derive(Clone, Debug)]
     struct MooreTestCell;
 
     impl Cell for MooreTestCell {
@@ -216,8 +216,7 @@ mod test {
                     None => {
                         none_cnt += 1;
                     },
-                    Some(n) => { 
-                        assert_eq!(self, n);
+                    Some(_) => {
                         neighbors_cnt += 1;
                     }
                 };
