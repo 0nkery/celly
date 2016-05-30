@@ -105,9 +105,9 @@ impl<'a, C: Cell + Clone + Default> SquareGrid<'a, C> {
     fn neighbors_iter<'b>(&self,
                           cells: &'b Vec<C>,
                           neighbors: Neighbors)
-        -> MooreSquareGridIterator<'b, C> {
+        -> SquareGridIterator<'b, C> {
 
-        MooreSquareGridIterator {
+        SquareGridIterator {
             cells: cells,
             neighbors: neighbors,
             index: 0,
@@ -158,14 +158,14 @@ impl<'a, C: Cell + Clone + Default> Grid for SquareGrid<'a, C> {
 }
 
 
-struct MooreSquareGridIterator<'a, C: Cell + 'a> {
+struct SquareGridIterator<'a, C: Cell + 'a> {
     cells: &'a Vec<C>,
     neighbors: Neighbors,
     index: usize,
 }
 
 
-impl<'a, C: Cell> Iterator for MooreSquareGridIterator<'a, C> {
+impl<'a, C: Cell> Iterator for SquareGridIterator<'a, C> {
     type Item = Option<&'a C>;
 
     fn next(&mut self) -> Option<Self::Item> {
