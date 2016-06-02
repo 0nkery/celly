@@ -29,9 +29,5 @@ pub mod traits {
     pub trait Engine {
         fn run_times(&mut self, times: i64);
     }
-
-    pub trait Parallel: Sized {
-        fn into_parts(self) -> Vec<Self>;
-    }
 }
 
