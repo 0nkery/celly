@@ -3,11 +3,14 @@ use std::ops::Add;
 use std::collections::HashMap;
 
 use traits::Cell;
+use traits::Coord;
 use traits::Engine;
 use traits::ReprConsumer;
 use traits::Grid;
 use engine::sequential::Sequential;
-use grid::square_moore::SquareGrid;
+use grid::square::SquareGrid;
+use grid::nhood::MooreNhood;
+use grid::square::GridCoord;
 use repr::CellRepr;
 use repr::GridRepr;
 
@@ -81,6 +84,8 @@ impl Cell for Life {
             LifeState::Dead => self.dead_state(alive_count)
         };
 
+        println!("{:?} ====> {:?}", self.state, new_state);
+
         let mut new_cell = self.clone();
         new_cell.state = new_state;
 
@@ -117,34 +122,32 @@ struct SpinnerTestConsumer {
 
 impl ReprConsumer for SpinnerTestConsumer {
 
-    fn consume(&mut self, repr: &GridRepr) {
+    fn consume<C: Coord>(&mut self, repr: &GridRepr<C>) {
         assert_eq!(repr.cells.len(), 9);
 
-        let alive_cells: Vec<&CellRepr> = 
+        println!("{:?}", repr);
+
+        let alive_cells: Vec<&CellRepr<C>> =
             repr.cells.iter().filter(|c| c.state[STATE] == ALIVE).collect();
         assert_eq!(alive_cells.len(), 3);
 
         self.vertical = !self.vertical;
 
+        println!("{:?}", alive_cells);
+
         // if spinner is in vertical state
-        if alive_cells[0].y == 1 {
-            assert!(alive_cells.iter().all(|c| c.y == 1));
+        if alive_cells.iter().all(|c| c.coord.x() == 1) {
             assert!(self.vertical);
         }
         // if spinner is in horizontal state
-        else if alive_cells[0].x == 1 {
-            assert!(alive_cells.iter().all(|c| c.x == 1));
+        if alive_cells.iter().all(|c| c.coord.y() == 1) {
             assert!(!self.vertical);
         }
-
     }
 }
 
 #[test]
 fn test_game_of_life() {
-
-    let mut dead_cell = HashMap::new();
-    dead_cell.insert(STATE, DEAD);
 
     let mut alive_cell = HashMap::new();
     alive_cell.insert(STATE, ALIVE);
@@ -153,28 +156,23 @@ fn test_game_of_life() {
     // D | A | D
     // D | A | D
     // D | A | D
-    let mut cells: Vec<CellRepr> = Vec::new();  
-    for x in 0 .. 3 {
-        for y in 0 .. 3 {
-
-            let state = match y {
-                1 => Some(&alive_cell),
-                _ => Some(&dead_cell)
-            };
-
-            cells.push(CellRepr::new(x, y, state));
-        }
-    }
+    // Cells not specified below should be equal to default cell value
+    let cells = vec![
+        CellRepr::new(GridCoord::from_2d(1, 0), Some(&alive_cell)),
+        CellRepr::new(GridCoord::from_2d(1, 1), Some(&alive_cell)),
+        CellRepr::new(GridCoord::from_2d(1, 2), Some(&alive_cell)),
+    ];
 
     {
-        let alive_cells: Vec<&CellRepr> = 
+        let alive_cells: Vec<&CellRepr<GridCoord>> =
             cells.iter().filter(|c| c.state[STATE] == ALIVE).collect();
         assert_eq!(alive_cells.len(), 3);
     }
 
     let grid_repr = GridRepr::new(3, 3, Some(cells));
 
-    let mut grid: SquareGrid<Life> = SquareGrid::new(3, 3);
+    let nhood = MooreNhood::new();
+    let mut grid: SquareGrid<Life, _> = SquareGrid::new(3, 3, nhood);
     grid.from_repr(&grid_repr);
 
     let consumer = SpinnerTestConsumer { vertical: true };

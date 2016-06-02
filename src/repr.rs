@@ -1,20 +1,19 @@
 use std::collections::HashMap;
 
+use traits::Coord;
 use traits::ReprConsumer;
 
 
-pub struct CellRepr<'a> {
-    pub x: i32,
-    pub y: i32,
+#[derive(Debug)]
+pub struct CellRepr<'a, C: Coord> {
+    pub coord: C,
     pub state: HashMap<&'a str, &'a str>
 }
 
 
-impl<'a> CellRepr<'a> {
+impl<'a, C: Coord> CellRepr<'a, C> {
 
-    pub fn new(x: i32, y: i32,
-               state: Option<&HashMap<&'a str, &'a str>>)
-        -> Self {
+    pub fn new(coord: C, state: Option<&HashMap<&'a str, &'a str>>) -> Self {
 
         let state = match state {
             Some(map) => map.clone(),
@@ -22,25 +21,25 @@ impl<'a> CellRepr<'a> {
         };
 
         CellRepr {
-            x: x,
-            y: y,
+            coord: coord,
             state: state
         }
     }
 }
 
 
-pub struct GridRepr<'a> {
+#[derive(Debug)]
+pub struct GridRepr<'a, C: Coord> {
     pub rows: i32,
     pub cols: i32,
-    pub cells: Vec<CellRepr<'a>>
+    pub cells: Vec<CellRepr<'a, C>>
 }
 
-impl<'a> GridRepr<'a> {
+impl<'a, C: Coord> GridRepr<'a, C> {
 
     pub fn new<'b>(rows: i32,
                    cols: i32,
-                   cells: Option<Vec<CellRepr<'a>>>)
+                   cells: Option<Vec<CellRepr<'a, C>>>)
         -> Self {
 
         let cells = match cells {
@@ -72,10 +71,10 @@ impl SimpleConsumer {
 
 impl ReprConsumer for SimpleConsumer {
 
-    fn consume(&mut self, repr: &GridRepr) {
+    fn consume<C: Coord>(&mut self, repr: &GridRepr<C>) {
 
         for cell in repr.cells.iter() {
-            println!("{} {}", cell.x, cell.y);
+            println!("{} {}", cell.coord.x(), cell.coord.y());
             for (state, value) in &cell.state {
                 println!("{}: {}", state, value);
             }    
