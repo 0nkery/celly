@@ -29,6 +29,7 @@ impl<'a, C: Cell> Iterator for Iter<'a, C> {
     type Item = Option<&'a C>;
 
     fn next(&mut self) -> Option<Self::Item> {
+
         let next = match self.index {
             i @ _  if i < self.count => {
 
@@ -38,7 +39,10 @@ impl<'a, C: Cell> Iterator for Iter<'a, C> {
                     None => Some(None)
                 }
             },
-            _ => None
+            _ => {
+                self.index = 0;
+                None
+            }
         };
         self.index += 1;
 
