@@ -22,7 +22,7 @@ pub mod traits {
     pub trait Nhood {
         type Coord: Coord;
 
-        fn neighbors(&self, coord: Self::Coord) -> Vec<Self::Coord>;
+        fn neighbors(&self, coord: &Self::Coord) -> Vec<Self::Coord>;
         fn neighbors_count(&self) -> usize;
     }
 

@@ -20,7 +20,7 @@ impl<C: Coord> Nhood for MooreNhood<C> {
     // 0 | 1 | 2
     // 3 | x | 4
     // 5 | 6 | 7
-    fn neighbors(&self, coord: Self::Coord) -> Vec<Self::Coord> {
+    fn neighbors(&self, coord: &Self::Coord) -> Vec<Self::Coord> {
 
         let x = coord.x();
         let y = coord.y();
