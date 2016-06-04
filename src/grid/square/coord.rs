@@ -65,7 +65,7 @@ mod tests {
     fn test_with_moore_nhood() {
         // 3 x 3 square grid with Moore's neighborhood
 
-        let nhood: MooreNhood<GridCoord> = MooreNhood::new();
+        let nhood = MooreNhood::new();
 
         let center = GridCoord::from_2d(1, 1);
 
