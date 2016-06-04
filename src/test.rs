@@ -118,6 +118,14 @@ struct SpinnerTestConsumer {
 }
 
 
+impl SpinnerTestConsumer {
+
+    pub fn new() -> Self {
+        SpinnerTestConsumer { vertical: true }
+    }
+}
+
+
 impl ReprConsumer for SpinnerTestConsumer {
 
     fn consume<C: Coord>(&mut self, repr: &GridRepr<C>) {
@@ -174,7 +182,7 @@ fn test_game_of_life() {
 
     grid.from_repr(&grid_repr);
 
-    let consumer = SpinnerTestConsumer { vertical: true };
+    let consumer = SpinnerTestConsumer::new();
     let mut engine = Sequential::new(grid, consumer);
     engine.run_times(2);
 }
