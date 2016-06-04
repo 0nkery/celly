@@ -50,16 +50,21 @@ impl<'a, C, N> SquareGrid<'a, C, N>
             cols: cols,
         };
 
-        grid.init_neighbors();
-        grid.init_cell_reprs();
+        grid.init();
 
         grid
     }
 
-    fn init_cell_reprs(&mut self) {
+    fn init(&mut self) {
 
         for (offset, cell) in self.cells.iter().enumerate() {
+
             let coord = GridCoord::from_offset(offset as i32, self.rows, self.cols);
+            // init neighbors
+            let neighbors = self.get_neighbors(&coord);
+            self.neighbors.push(neighbors);
+
+            // init representation
             let mut repr = CellRepr::new(coord, None);
 
             cell.repr(&mut repr.state);
@@ -67,31 +72,24 @@ impl<'a, C, N> SquareGrid<'a, C, N>
         }
     }
 
-    fn init_neighbors(&mut self) {
+    fn get_neighbors(&self, coord: &GridCoord) -> Vec<Option<usize>> {
 
-        let len = self.cells.len() as i32;
+        let neighbors_count = self.nhood.neighbors_count();
+        let mut neighbors = Vec::with_capacity(neighbors_count);
 
-        for offset in 0 .. len {
-            let coord = GridCoord::from_offset(offset, self.rows, self.cols);
+        for coord in self.nhood.neighbors(coord).iter() {
 
-            let neighbors_count = self.nhood.neighbors_count();
-            let mut neighbors = Vec::with_capacity(neighbors_count);
+            if coord.x() >= 0 && coord.x() < self.cols &&
+               coord.y() >= 0 && coord.y() < self.rows {
 
-            let neighbors_coords = self.nhood.neighbors(coord);
-            for coord in neighbors_coords.iter() {
-
-                if coord.x() >= 0 && coord.x() < self.cols &&
-                   coord.y() >= 0 && coord.y() < self.rows {
-
-                    neighbors.push(Some(coord.offset(self.cols)));
-                }
-                else {
-                    neighbors.push(None);
-                }
+                neighbors.push(Some(self.offset(coord)));
             }
-
-            self.neighbors.push(neighbors);
+            else {
+                neighbors.push(None);
+            }
         }
+
+        neighbors
     }
 
     fn neighbors_iter<'b>(&self,
@@ -99,6 +97,11 @@ impl<'a, C, N> SquareGrid<'a, C, N>
                           neighbors: &'b Vec<Option<usize>>) -> Iter<'b, C> {
 
         Iter::new(cells, neighbors, self.nhood.neighbors_count())
+    }
+
+    #[inline]
+    pub fn offset<Crd: Coord>(&self, coord: &Crd) -> usize {
+        (coord.y() * self.cols + coord.x()) as usize
     }
 }
 
@@ -113,6 +116,7 @@ impl<'a, C, N> Grid for SquareGrid<'a, C, N>
         self.old_cells = self.cells.clone();
 
         for (cell_no, cell) in self.old_cells.iter().enumerate() {
+
             let ref neighbors = self.neighbors[cell_no];
             let neighbors_iter = self.neighbors_iter(&self.old_cells, &neighbors);
 
@@ -127,6 +131,7 @@ impl<'a, C, N> Grid for SquareGrid<'a, C, N>
     }
 
     fn repr(&self) -> &GridRepr<GridCoord> {
+
         &self.repr
     }
 
@@ -136,8 +141,8 @@ impl<'a, C, N> Grid for SquareGrid<'a, C, N>
         debug_assert_eq!(self.cols, repr.cols);
 
         for cell_repr in repr.cells.iter() {
-            let c = GridCoord::from_2d(cell_repr.coord.x(), cell_repr.coord.y());
-            let offset = c.offset(self.cols);
+
+            let offset = self.offset(&cell_repr.coord);
 
             let ref mut cell = self.cells[offset];
             cell.from_repr(&cell_repr.state);

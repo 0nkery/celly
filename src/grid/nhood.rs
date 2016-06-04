@@ -26,9 +26,9 @@ impl<C: Coord> Nhood for MooreNhood<C> {
         let y = coord.y();
 
         let neighbors_coords = vec![
-            C::from_2d(x - 1, y - 1), C::from_2d(x - 1, y), C::from_2d(x - 1, y + 1),
-            C::from_2d(x, y - 1),     /* x */               C::from_2d(x, y + 1),
-            C::from_2d(x + 1, y - 1), C::from_2d(x + 1, y), C::from_2d(x + 1, y + 1)
+            C::from_2d(x - 1, y - 1), C::from_2d(x, y - 1), C::from_2d(x + 1, y - 1),
+            C::from_2d(x - 1, y),     /* x */               C::from_2d(x + 1, y),
+            C::from_2d(x - 1, y + 1), C::from_2d(x, y + 1), C::from_2d(x + 1, y + 1)
         ];
 
         neighbors_coords

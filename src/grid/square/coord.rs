@@ -11,11 +11,6 @@ pub struct GridCoord {
 impl GridCoord {
 
     #[inline]
-    pub fn offset(&self, cols: i32) -> usize {
-        (self.x * cols + self.y) as usize
-    }
-
-    #[inline]
     pub fn from_offset(offset: i32, rows: i32, cols: i32) -> GridCoord {
         let col = offset % cols;
         let row = (offset - col) / rows;
@@ -52,23 +47,6 @@ mod tests {
     use super::GridCoord;
 
     #[test]
-    fn test_offset() {
-        let c = GridCoord::from_2d(0, 0);
-        assert_eq!(c.offset(10), 0);
-        assert_eq!(c.offset(0), 0);
-        assert_eq!(c.offset(1000), 0);
-
-        let c = GridCoord::from_2d(10, 0);
-        assert_eq!(c.offset(1), 10);
-        assert_eq!(c.offset(10), 100);
-
-        let c = GridCoord::from_2d(0, 10);
-        assert_eq!(c.offset(0), 10);
-        assert_eq!(c.offset(10), 10);
-        assert_eq!(c.offset(1000), 10);
-    }
-
-    #[test]
     fn test_from_offset() {
         let c = GridCoord::from_offset(0, 10, 10);
         assert_eq!(c.x(), 0);
@@ -90,18 +68,17 @@ mod tests {
         let nhood: MooreNhood<GridCoord> = MooreNhood::new();
 
         let center = GridCoord::from_2d(1, 1);
-        assert_eq!(center.offset(3), 4);
 
-        let neighbors = nhood.neighbors(center);
+        let neighbors = nhood.neighbors(&center);
         assert_eq!(neighbors.len(), nhood.neighbors_count());
 
         assert_eq!(neighbors[0], GridCoord::from_2d(0, 0));
-        assert_eq!(neighbors[1], GridCoord::from_2d(0, 1));
-        assert_eq!(neighbors[2], GridCoord::from_2d(0, 2));
-        assert_eq!(neighbors[3], GridCoord::from_2d(1, 0));
-        assert_eq!(neighbors[4], GridCoord::from_2d(1, 2));
-        assert_eq!(neighbors[5], GridCoord::from_2d(2, 0));
-        assert_eq!(neighbors[6], GridCoord::from_2d(2, 1));
+        assert_eq!(neighbors[1], GridCoord::from_2d(1, 0));
+        assert_eq!(neighbors[2], GridCoord::from_2d(2, 0));
+        assert_eq!(neighbors[3], GridCoord::from_2d(0, 1));
+        assert_eq!(neighbors[4], GridCoord::from_2d(2, 1));
+        assert_eq!(neighbors[5], GridCoord::from_2d(0, 2));
+        assert_eq!(neighbors[6], GridCoord::from_2d(1, 2));
         assert_eq!(neighbors[7], GridCoord::from_2d(2, 2));
     }
 }
