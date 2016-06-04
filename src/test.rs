@@ -84,8 +84,6 @@ impl Cell for Life {
             LifeState::Dead => self.dead_state(alive_count)
         };
 
-        println!("{:?} ====> {:?}", self.state, new_state);
-
         let mut new_cell = self.clone();
         new_cell.state = new_state;
 
@@ -125,15 +123,15 @@ impl ReprConsumer for SpinnerTestConsumer {
     fn consume<C: Coord>(&mut self, repr: &GridRepr<C>) {
         assert_eq!(repr.cells.len(), 9);
 
-        println!("{:?}", repr);
-
         let alive_cells: Vec<&CellRepr<C>> =
             repr.cells.iter().filter(|c| c.state[STATE] == ALIVE).collect();
         assert_eq!(alive_cells.len(), 3);
 
-        self.vertical = !self.vertical;
+        let dead_cells: Vec<&CellRepr<C>> =
+            repr.cells.iter().filter(|c| c.state[STATE] == DEAD).collect();
+        assert_eq!(dead_cells.len(), 6);
 
-        println!("{:?}", alive_cells);
+        self.vertical = !self.vertical;
 
         // if spinner is in vertical state
         if alive_cells.iter().all(|c| c.coord.x() == 1) {
@@ -149,30 +147,31 @@ impl ReprConsumer for SpinnerTestConsumer {
 #[test]
 fn test_game_of_life() {
 
-    let mut alive_cell = HashMap::new();
-    alive_cell.insert(STATE, ALIVE);
+    let nhood = MooreNhood::new();
+    let mut grid: SquareGrid<Life, _> = SquareGrid::new(3, 3, nhood);
 
     // Vertical spinner
     // D | A | D
     // D | A | D
     // D | A | D
     // Cells not specified below should be equal to default cell value
+    let mut alive_cell = HashMap::new();
+    alive_cell.insert(STATE, ALIVE);
+
     let cells = vec![
         CellRepr::new(GridCoord::from_2d(1, 0), Some(&alive_cell)),
         CellRepr::new(GridCoord::from_2d(1, 1), Some(&alive_cell)),
         CellRepr::new(GridCoord::from_2d(1, 2), Some(&alive_cell)),
     ];
 
-    {
-        let alive_cells: Vec<&CellRepr<GridCoord>> =
-            cells.iter().filter(|c| c.state[STATE] == ALIVE).collect();
-        assert_eq!(alive_cells.len(), 3);
-    }
-
     let grid_repr = GridRepr::new(3, 3, Some(cells));
 
-    let nhood = MooreNhood::new();
-    let mut grid: SquareGrid<Life, _> = SquareGrid::new(3, 3, nhood);
+    let life_default = Life::default();
+    let mut default_state = HashMap::new();
+    life_default.repr(&mut default_state);
+
+    assert!(grid.repr().cells.iter().all(|c| c.state[STATE] == default_state[STATE]));
+
     grid.from_repr(&grid_repr);
 
     let consumer = SpinnerTestConsumer { vertical: true };
