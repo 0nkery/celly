@@ -2,7 +2,7 @@ pub mod grid;
 pub mod engine;
 pub mod repr;
 
-mod test;
+mod examples;
 
 
 pub mod traits {
