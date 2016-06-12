@@ -1,5 +1,4 @@
 #![cfg(test)]
-use std::ops::Add;
 use std::collections::HashMap;
 
 use traits::Cell;
@@ -16,7 +15,7 @@ use repr::GridRepr;
 
 /// Implementation of Conway's Game of Life.
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 enum LifeState {
     Dead,
     Alive
@@ -31,17 +30,11 @@ impl Life {
     
     fn alive_count<'a, I>(&self, neighbors: I) -> i32 
         where I: Iterator<Item=Option<&'a Self>> {
-        neighbors.map(
-            |n| {
-                match n {
-                    Some(ref cell) => match cell.state {
-                        LifeState::Alive => 1,
-                        LifeState::Dead => 0
-                    },
-                    None => 0,
-                }
-            }
-        ).fold(0, Add::add)
+
+        neighbors.filter(|n| match *n {
+            Some(n) => n.state == LifeState::Alive,
+            None => false
+        }).count() as i32
     }
 
     #[inline]
