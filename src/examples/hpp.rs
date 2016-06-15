@@ -10,7 +10,7 @@ use traits::Engine;
 use traits::ReprConsumer;
 use repr::CellRepr;
 use repr::GridRepr;
-use engine::sequential::Sequential;
+use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::square::GridCoord;
 use grid::square::SquareGrid;

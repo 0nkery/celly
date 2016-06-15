@@ -6,7 +6,7 @@ use traits::Coord;
 use traits::Engine;
 use traits::ReprConsumer;
 use traits::Grid;
-use engine::sequential::Sequential;
+use engine::Sequential;
 use grid::square::SquareGrid;
 use grid::nhood::MooreNhood;
 use grid::square::GridCoord;
