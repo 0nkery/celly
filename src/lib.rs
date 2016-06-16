@@ -1,31 +1,26 @@
 pub mod grid;
 pub mod engine;
-pub mod repr;
 
 mod examples;
 
 
 pub mod traits {
 
-    use std::collections::HashMap;
+    pub trait Cell: Default + Clone + Binary {
 
-    use repr::GridRepr;
-
-    pub trait Cell: Default + Clone {
         fn step<'a, I>(&'a self, neighbors: I) -> Self
             where I: Iterator<Item=Option<&'a Self>>;
-        fn repr(&self, meta: &mut HashMap<&str, &str>);
-        fn from_repr(&mut self, meta: &HashMap<&str, &str>);
     }
 
     pub trait Nhood {
         type Coord: Coord;
 
-        fn neighbors(&self, coord: &Self::Coord) -> Vec<Self::Coord>;
+        fn neighbors(&self, &Self::Coord) -> Vec<Self::Coord>;
+
         fn neighbors_count(&self) -> usize;
     }
 
-    pub trait Coord {
+    pub trait Coord: PartialEq + Clone {
         fn from_2d(x: i32, y: i32) -> Self;
 
         fn x(&self) -> i32;
@@ -34,19 +29,27 @@ pub mod traits {
     }
     
     pub trait Grid {
+        type Cell: Cell;
         type Coord: Coord;
 
         fn step(&mut self);
-        fn repr(&self) -> &GridRepr<Self::Coord>;
-        fn from_repr<'a: 'b, 'b, C: Coord>(&'a mut self, &GridRepr<'b, C>);
+
+        fn cells(&self) -> &Vec<Self::Cell>;
+        fn dimensions(&self) -> Self::Coord;
+
+        fn restore<G: Grid>(&mut self, &G);
     }
 
     pub trait ReprConsumer {
-        fn consume<C: Coord>(&mut self, repr: &GridRepr<C>);
+        fn consume<G: Grid>(&mut self, repr: &G);
     }
 
     pub trait Engine {
         fn run_times(&mut self, times: i64);
+    }
+
+    pub trait Binary: From<Vec<u8>> {
+        fn bytes(&self) -> &[u8];
     }
 }
 
