@@ -23,8 +23,7 @@ impl<G: Grid, C: ReprConsumer> Engine for Sequential<G, C> {
     fn run_times(&mut self, times: i64) {
         for _ in 0..times {
             self.grid.step();
-            let repr = self.grid.repr();
-            self.consumer.consume(repr);
+            self.consumer.consume(&self.grid);
         }
     }
 }
