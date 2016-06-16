@@ -1,7 +1,7 @@
 use traits::Coord;
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct GridCoord {
     x: i32,
     y: i32,
