@@ -6,10 +6,14 @@ mod examples;
 
 pub mod traits {
 
-    pub trait Cell: Default + Clone + Binary {
+    pub trait Cell: Clone + Binary {
+        type Coord: Coord;
 
         fn step<'a, I>(&'a self, neighbors: I) -> Self
             where I: Iterator<Item=Option<&'a Self>>;
+
+        fn with_coord<C: Coord>(C) -> Self;
+        fn coord(&self) -> &Self::Coord;
     }
 
     pub trait Nhood {
@@ -20,7 +24,7 @@ pub mod traits {
         fn neighbors_count(&self) -> usize;
     }
 
-    pub trait Coord: PartialEq + Clone {
+    pub trait Coord: Clone {
         fn from_2d(x: i32, y: i32) -> Self;
 
         fn x(&self) -> i32;
@@ -38,6 +42,7 @@ pub mod traits {
         fn dimensions(&self) -> Self::Coord;
 
         fn restore<G: Grid>(&mut self, &G);
+        fn set_cells(&mut self, Vec<Self::Cell>);
     }
 
     pub trait ReprConsumer {
@@ -48,7 +53,8 @@ pub mod traits {
         fn run_times(&mut self, times: i64);
     }
 
-    pub trait Binary: From<Vec<u8>> {
+    pub trait Binary {
+        fn binary(&[u8]) -> Self;
         fn bytes(&self) -> &[u8];
     }
 }
