@@ -6,12 +6,11 @@ use traits::Coord;
 use traits::Engine;
 use traits::ReprConsumer;
 use traits::Grid;
+use traits::Binary;
 use engine::Sequential;
 use grid::square::SquareGrid;
 use grid::nhood::MooreNhood;
 use grid::square::GridCoord;
-use repr::CellRepr;
-use repr::GridRepr;
 
 /// Implementation of Conway's Game of Life.
 
@@ -23,7 +22,8 @@ enum LifeState {
 
 #[derive(Clone, Debug)]
 struct Life {
-    state: LifeState
+    state: LifeState,
+    coord: (i32, i32)
 }
 
 impl Life {
@@ -54,18 +54,12 @@ impl Life {
     }
 }
 
-impl Default for Life {
-
-    fn default() -> Self {
-        Life { state: LifeState::Dead }
-    }
-}
-
 const ALIVE: &'static str = "a";
 const DEAD: &'static str = "d";
 const STATE: &'static str = "s";
 
 impl Cell for Life {
+    type Coord = (i32, i32);
 
     fn step<'a, I>(&self, neighbors: I) -> Self 
         where I: Iterator<Item=Option<&'a Self>> {
@@ -83,25 +77,24 @@ impl Cell for Life {
         new_cell
     }
 
-    fn repr(&self, meta: &mut HashMap<&str, &str>) {
-
-        let state_str = match self.state {
-            LifeState::Alive => ALIVE,
-            LifeState::Dead  => DEAD
-        };
-
-        meta.insert(STATE, state_str);
+    fn with_coord<C: Coord>(coord: C) -> Self {
+        Life { state: LifeState::Dead, coord: (coord.x(), coord.y()) }
     }
 
-    fn from_repr(&mut self, meta: &HashMap<&str, &str>) {
+    fn coord(&self) -> &Self::Coord {
+        &self.coord
+    }
+}
 
-        let new_state = match meta[STATE] {
-            ALIVE => LifeState::Alive,
-            DEAD => LifeState::Dead,
-            _ => panic!("Unknown state: {}.", meta[STATE])
-        };
 
-        self.state = new_state;
+impl Binary for Life {
+
+    fn binary(bytes: &[u8]) -> Self {
+
+    }
+
+    fn bytes(&self) -> &[u8] {
+
     }
 }
 
@@ -121,25 +114,31 @@ impl SpinnerTestConsumer {
 
 impl ReprConsumer for SpinnerTestConsumer {
 
-    fn consume<C: Coord>(&mut self, repr: &GridRepr<C>) {
-        assert_eq!(repr.cells.len(), 9);
+    fn consume<G: Grid>(&mut self, grid: &G) {
+        assert_eq!(grid.cells().len(), 9);
 
-        let alive_cells: Vec<&CellRepr<C>> =
-            repr.cells.iter().filter(|c| c.state[STATE] == ALIVE).collect();
-        assert_eq!(alive_cells.len(), 3);
+        let dead_cells_count =
+            grid.cells()
+                .iter()
+                .map(|c| Life::binary(c.bytes()))
+                .filter(|c| c.state == LifeState::Dead).count();
+        assert_eq!(dead_cells_count, 6);
 
-        let dead_cells: Vec<&CellRepr<C>> =
-            repr.cells.iter().filter(|c| c.state[STATE] == DEAD).collect();
-        assert_eq!(dead_cells.len(), 6);
+        let alive_cells = 
+            grid.cells()
+                .iter()
+                .map(|c| Life::binary(c.bytes()))
+                .filter(|c| c.state == LifeState::Alive);
+        assert_eq!(alive_cells.count(), 3);
 
         self.vertical = !self.vertical;
 
         // if spinner is in vertical state
-        if alive_cells.iter().all(|c| c.coord.x() == 1) {
+        if alive_cells.all(|c| c.coord.x() == 1) {
             assert!(self.vertical);
         }
         // if spinner is in horizontal state
-        if alive_cells.iter().all(|c| c.coord.y() == 1) {
+        if alive_cells.all(|c| c.coord.y() == 1) {
             assert!(!self.vertical);
         }
     }
@@ -151,29 +150,26 @@ fn test_game_of_life() {
     let nhood = MooreNhood::new();
     let mut grid: SquareGrid<Life, _> = SquareGrid::new(3, 3, nhood);
 
+    // Should be in default state
+    let default_state = LifeState::Dead;
+
+    assert!(
+        grid.cells()
+            .iter().map(|c| Life::binary(c.bytes()))
+            .all(|c| c.state == default_state)
+    );
+
     // Vertical spinner
     // D | A | D
     // D | A | D
     // D | A | D
-    // Cells not specified below should be equal to default cell value
-    let mut alive_cell = HashMap::new();
-    alive_cell.insert(STATE, ALIVE);
-
     let cells = vec![
-        CellRepr::new(GridCoord::from_2d(1, 0), Some(&alive_cell)),
-        CellRepr::new(GridCoord::from_2d(1, 1), Some(&alive_cell)),
-        CellRepr::new(GridCoord::from_2d(1, 2), Some(&alive_cell)),
+        Life { state: LifeState::Alive, coord: (1, 0) },
+        Life { state: LifeState::Alive, coord: (1, 1) },
+        Life { state: LifeState::Alive, coord: (1, 2) }
     ];
 
-    let grid_repr = GridRepr::new(3, 3, Some(cells));
-
-    let life_default = Life::default();
-    let mut default_state = HashMap::new();
-    life_default.repr(&mut default_state);
-
-    assert!(grid.repr().cells.iter().all(|c| c.state[STATE] == default_state[STATE]));
-
-    grid.from_repr(&grid_repr);
+    grid.set_cells(cells);
 
     let consumer = SpinnerTestConsumer::new();
     let mut engine = Sequential::new(grid, consumer);

@@ -3,13 +3,12 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 
+use traits::Binary;
 use traits::Cell;
 use traits::Coord;
 use traits::Grid;
 use traits::Engine;
 use traits::ReprConsumer;
-use repr::CellRepr;
-use repr::GridRepr;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::square::GridCoord;
@@ -24,30 +23,9 @@ enum Stage {
     Transport
 }
 
-const COLLISION: &'static str = "c";
-const TRANSPORT: &'static str = "t";
 
-impl Stage {
-
-    fn from_str(string: &str) -> Self {
-
-        match string {
-            COLLISION => Stage::Collision,
-            TRANSPORT => Stage::Collision,
-            _ => panic!("Unknown stage.")
-        }
-    }
-}
-
-impl From<Stage> for &'static str {
-
-    fn from(stage: Stage) -> &'static str {
-
-        match stage {
-            Stage::Collision => COLLISION,
-            Stage::Transport => TRANSPORT
-        }
-    }
+impl Default for Stage {
+    fn default() -> Self { Stage::Collision }
 }
 
 
@@ -59,23 +37,8 @@ enum Direction {
     Down
 }
 
-const UP: &'static str = "u";
-const LEFT: &'static str = "l";
-const RIGHT: &'static str = "r";
-const DOWN: &'static str = "d";
 
 impl Direction {
-
-    fn from_str(string: &str) -> Self {
-
-        match string {
-            UP => Direction::Up,
-            LEFT => Direction::Left,
-            RIGHT => Direction::Right,
-            DOWN => Direction::Down,
-            _ => panic!("Unknown direction.")
-        }
-    }
 
     fn opposite(&self) -> Self {
 
@@ -98,45 +61,29 @@ impl Direction {
     }
 }
 
-impl<'a> From<&'a Direction> for &'static str {
 
-    fn from(direction: &'a Direction) -> &'static str {
-
-        match *direction {
-            Direction::Up => UP,
-            Direction::Left => LEFT,
-            Direction::Right => RIGHT,
-            Direction::Down => DOWN
-        }
-    }
-}
-
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 struct HPP {
     particles: [bool; 4],
-    stage: Stage
+    stage: Stage,
+    coord: (i32, i32)
 }
 
 
-impl Default for HPP {
+impl Binary for HPP {
 
-    fn default() -> Self {
+    fn binary(bytes: &[u8]) -> Self {
 
-        HPP {
-            stage: Stage::Collision,
-            particles: [false; 4]
-        }
+    }
+
+    fn bytes(&self) -> &[u8] {
+
     }
 }
-
-
-const EXISTS: &'static str = "true";
-const DOESNT_EXIST: &'static str = "false";
-const STAGE: &'static str = "stage";
 
 
 impl Cell for HPP {
+    type Coord = (i32, i32);
 
     fn step<'a, I>(&'a self, neighbors: I) -> Self
             where I: Iterator<Item=Option<&'a Self>> {
@@ -147,38 +94,16 @@ impl Cell for HPP {
         }
     }
 
-    fn repr(&self, meta: &mut HashMap<&str, &str>) {
-
-        for direction in self.directions().iter() {
-
-            let exists = self.particle(direction);
-
-            meta.insert(
-                direction.into(),
-                if exists { EXISTS } else { DOESNT_EXIST }
-            );
-
+    fn with_coord<C: Coord>(coord: C) -> Self {
+        HPP { 
+            stage: Stage::Collision,
+            coord: (coord.x(), coord.y()),
+            ..Default::default()
         }
-        meta.insert(STAGE, self.stage.into());
     }
 
-    fn from_repr(&mut self, meta: &HashMap<&str, &str>) {
-
-        for (state, value) in meta.iter() {
-
-            match *state {
-
-                STAGE => {
-                    self.stage = Stage::from_str(value);
-                },
-                _ => {
-                    let direction = Direction::from_str(state);
-                    let exists = bool::from_str(value).unwrap();
-
-                    self.set_particle(&direction, exists);
-                }
-            }
-        }
+    fn coord(&self) -> &Self::Coord {
+        &self.coord
     }
 }
 
@@ -247,7 +172,7 @@ impl HPP {
         new
     }
 
-    fn particle(&self, direction: &Direction) -> bool {
+    pub fn particle(&self, direction: &Direction) -> bool {
 
         match *direction {
             Direction::Up => self.particles[0],
@@ -268,7 +193,7 @@ impl HPP {
     }
 
     #[inline]
-    fn directions(&self) -> [Direction; 4] {
+    pub fn directions(&self) -> [Direction; 4] {
         [Direction::Up, Direction::Left, Direction::Right, Direction::Down]
     }
 }
@@ -284,81 +209,88 @@ impl HPPTestConsumer {
         HPPTestConsumer { }
     }
 
-    fn particles_count<C: Coord>(&self,
-                                 cells: &Vec<CellRepr<C>>,
-                                 direction: &'static str) -> i32 {
+    fn particles_count<C: Cell>(&self,
+                                 cells: &Vec<C>,
+                                 direction: &Direction) -> i32 {
 
         cells.iter()
-             .filter(|c| c.state.get(direction).unwrap_or(&DOESNT_EXIST) == &EXISTS)
+             .map(|c| HPP::binary(c.bytes()))
+             .filter(|c| c.particle(direction) == true)
              .count() as i32
     }
 
-    fn find_cell<'a: 'b, 'b, C: Coord>(&'a self,
-                                       cells: &'a Vec<CellRepr<'a, C>>,
-                                       x: i32, y: i32) -> &'b CellRepr<C> {
+    fn find_cell<C: Cell>(&self,
+                          cells: &Vec<C>,
+                          x: i32, y: i32) -> HPP {
 
-        cells.iter().find(|c| c.coord.x() == x &&
-                              c.coord.y() == y).unwrap()
+        let found = cells.iter()
+                         .find(|c| c.coord().x() == x && c.coord().y() == y)
+                         .unwrap();
+        HPP::binary(found.bytes())
     }
 
-    fn test_collision<C: Coord>(&self, repr: &GridRepr<C>) {
+    fn test_collision<G: Grid>(&self, grid: &G) {
 
-        let left_particle_count = self.particles_count(&repr.cells, LEFT);
+        let left_particle_count = 
+            self.particles_count(&grid.cells(), &Direction::Left);
         assert_eq!(left_particle_count, 0);
 
-        let right_particle_count = self.particles_count(&repr.cells, RIGHT);
+        let right_particle_count = 
+            self.particles_count(&grid.cells(), &Direction::Right);
         assert_eq!(right_particle_count, 2);
 
-        let up_particles_count = self.particles_count(&repr.cells, UP);
+        let up_particles_count = 
+            self.particles_count(&grid.cells(), &Direction::Up);
         assert_eq!(up_particles_count, 1);
 
-        let down_particles_count = self.particles_count(&repr.cells, DOWN);
+        let down_particles_count = 
+            self.particles_count(&grid.cells(), &Direction::Down);
         assert_eq!(down_particles_count, 1);
 
-        let rebound_to_right = self.find_cell(&repr.cells, 0, 1);
-        assert_eq!(rebound_to_right.state.get(RIGHT).unwrap(), &EXISTS);
+        let rebound_to_right = 
+            self.find_cell(&grid.cells(), 0, 1);
+        assert_eq!(rebound_to_right.particle(&Direction::Right), true);
 
-        let head_on_up = self.find_cell(&repr.cells, 1, 0);
-        assert_eq!(head_on_up.state.get(UP).unwrap(), &EXISTS);
+        let head_on_up = 
+            self.find_cell(&grid.cells(), 1, 0);
+        assert_eq!(head_on_up.particle(&Direction::Up), true);
 
-        let head_on_down = self.find_cell(&repr.cells, 2, 0);
-        assert_eq!(head_on_down.state.get(DOWN).unwrap(), &EXISTS);
+        let head_on_down = 
+            self.find_cell(&grid.cells(), 2, 0);
+        assert_eq!(head_on_down.particle(&Direction::Down), true);
     }
 
-    fn test_transport<C: Coord>(&self, repr: &GridRepr<C>) {
-        let simple_move_to_right = self.find_cell(&repr.cells, 1, 2);
-        assert_eq!(simple_move_to_right.state.get(RIGHT).unwrap(), &EXISTS);
+    fn test_transport<G: Grid>(&self, grid: &G) {
+        let simple_move_to_right = self.find_cell(&grid.cells(), 1, 2);
+        assert_eq!(simple_move_to_right.particle(&Direction::Right), true);
 
-        let move_to_right_after_rebound = self.find_cell(&repr.cells, 1, 2);
-        assert_eq!(move_to_right_after_rebound.state.get(RIGHT).unwrap(), &EXISTS);
+        let move_to_right_after_rebound = self.find_cell(&grid.cells(), 1, 2);
+        assert_eq!(move_to_right_after_rebound.particle(&Direction::Right), true);
 
-        let move_to_down_after_head_on = self.find_cell(&repr.cells, 2, 1);
-        assert_eq!(move_to_down_after_head_on.state.get(DOWN).unwrap(), &EXISTS);
+        let move_to_down_after_head_on = self.find_cell(&grid.cells(), 2, 1);
+        assert_eq!(move_to_down_after_head_on.particle(&Direction::Down), true);
 
-        let fixed_to_up_after_head_on = self.find_cell(&repr.cells, 1, 0);
-        assert_eq!(fixed_to_up_after_head_on.state.get(UP).unwrap(), &EXISTS);
+        let fixed_to_up_after_head_on = self.find_cell(&grid.cells(), 1, 0);
+        assert_eq!(fixed_to_up_after_head_on.particle(&Direction::Up), true);
     }
 
-    fn pretty_print<C: Coord>(&self, repr: &GridRepr<C>) {
+    fn pretty_print<G: Grid>(&self, grid: &G) {
         println!("");
 
         for y in 0 .. 3 {
             print!("|");
 
             for x in 0 .. 3 {
-                let cell = self.find_cell(&repr.cells, x, y);
+                let cell = self.find_cell(grid.cells(), x, y);
                 let maybe_particle = 
-                    cell.state.iter()
-                              .find(|&(k, v)| k != &STAGE && v == &EXISTS);
+                    cell.directions().iter().find(|d| cell.particle(d));
 
                 let to_print = match maybe_particle {
-                    Some((&UP, _)) => " ^ |",
-                    Some((&LEFT, _)) => " < |",
-                    Some((&RIGHT, _)) => " > |",
-                    Some((&DOWN, _)) => " v |",
+                    Some(&Direction::Up) => " ^ |",
+                    Some(&Direction::Left) => " < |",
+                    Some(&Direction::Right) => " > |",
+                    Some(&Direction::Down) => " v |",
                     None => " * |",
-
-                    Some((_, _)) => panic!("Unknown particle direction.")
                 };
                 print!("{}", to_print);
             }
@@ -370,16 +302,17 @@ impl HPPTestConsumer {
 
 impl ReprConsumer for HPPTestConsumer {
 
-    fn consume<C: Coord>(&mut self, repr: &GridRepr<C>) {
-        assert_eq!(repr.cells.len(), 9);
+    fn consume<G: Grid>(&mut self, grid: &G) {
+        assert_eq!(grid.cells().len(), 9);
 
-        self.pretty_print(repr);
+        self.pretty_print(grid);
 
         // We are testing previous state.
-        match *repr.cells[0].state.get(STAGE).unwrap() {
-            COLLISION => self.test_transport(repr),
-            TRANSPORT => self.test_collision(repr),
-            _ => panic!("Unknown cell stage.")
+        let first = HPP::binary(grid.cells()[0].bytes());
+
+        match first.stage {
+            Stage::Collision => self.test_transport(grid),
+            Stage::Transport => self.test_collision(grid),
         }
     }
 }
@@ -394,28 +327,25 @@ fn test_particles() {
     // 3x3 grid with 4 particles. There should be 
     // one rebound, head-on collision and simple move.
 
-    let mut left_particle = HashMap::new();
-    left_particle.insert(LEFT, EXISTS);
-
-    let mut right_particle = HashMap::new();
-    right_particle.insert(RIGHT, EXISTS);
+    let left_particle = [false, true, false, false];
+    let right_particle = [false, false, true, false];
 
     let cells = vec![
-        CellRepr::new(GridCoord::from_2d(1, 0), Some(&right_particle)),
-        CellRepr::new(GridCoord::from_2d(2, 0), Some(&left_particle)),
-        CellRepr::new(GridCoord::from_2d(0, 1), Some(&left_particle)),
-        CellRepr::new(GridCoord::from_2d(0, 2), Some(&right_particle)),
+        HPP { stage: Stage::Collision, particles: right_particle, coord: (1, 0) },
+        HPP { stage: Stage::Collision, particles: left_particle, coord: (2, 0) },
+        HPP { stage: Stage::Collision, particles: left_particle, coord: (0, 1) },
+        HPP { stage: Stage::Collision, particles: right_particle, coord: (0, 2) },
     ];
-
-    let grid_repr = GridRepr::new(3, 3, Some(cells));
 
     let nhood = VonNeumannNhood::new();
     let mut grid: SquareGrid<HPP, _> = SquareGrid::new(3, 3, nhood);
-    grid.from_repr(&grid_repr);
+    grid.set_cells(cells);
 
     let right_particles_count = 
-        grid.repr().cells.iter()
-            .filter(|c| c.state.get(RIGHT).unwrap_or(&DOESNT_EXIST) == &EXISTS)
+        grid.cells()
+            .iter()
+            .map(|c| HPP::binary(c.bytes()))
+            .filter(|c| c.particle(&Direction::Right) == true)
             .count();
     assert_eq!(right_particles_count, 2);
 
