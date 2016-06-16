@@ -2,14 +2,19 @@
 use std::collections::HashMap;
 
 use traits::Cell;
+use traits::Coord;
 use traits::Grid;
+use traits::Binary;
 use grid::nhood::MooreNhood;
 use grid::square::SquareGrid;
 
 #[derive(Clone, Debug)]
-struct MooreTestCell;
+struct MooreTestCell {
+    coord: (i32, i32)
+}
 
 impl Cell for MooreTestCell {
+    type Coord = (i32, i32);
 
     fn step<'a, I>(&self, neighbors: I) -> Self 
         where I: Iterator<Item=Option<&'a Self>> {
@@ -39,14 +44,26 @@ impl Cell for MooreTestCell {
         self.clone()
     }
 
-    fn repr(&self, _: &mut HashMap<&str, &str>) {}
-    fn from_repr(&mut self, _: &HashMap<&str, &str>) {}
+    fn with_coord<C: Coord>(coord: C) -> Self {
+        MooreTestCell { coord: (coord.x(), coord.y()) }
+    }
+
+    fn coord(&self) -> &Self::Coord {
+        &self.coord
+    }
 }
 
-impl Default for MooreTestCell {
+impl Binary for MooreTestCell {
 
-    fn default() -> Self { MooreTestCell }
+    fn binary(_: &[u8]) -> Self {
+        MooreTestCell { coord: (0, 0) }
+    }
+
+    fn bytes(&self) -> &[u8] {
+
+    }
 }
+
 
 #[test]
 fn test_neighbors() {
