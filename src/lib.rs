@@ -8,7 +8,6 @@ mod examples;
 pub mod traits {
 
     use std::collections::HashMap;
-    use std::fmt::Debug;
 
     use repr::GridRepr;
 
@@ -26,7 +25,7 @@ pub mod traits {
         fn neighbors_count(&self) -> usize;
     }
 
-    pub trait Coord: Debug {
+    pub trait Coord {
         fn from_2d(x: i32, y: i32) -> Self;
 
         fn x(&self) -> i32;
