@@ -33,7 +33,7 @@ impl<C, N> SquareGrid<C, N>
 
         let len = (rows * cols) as usize;
 
-        let cells = vec![C::default(); len];
+        let cells = Vec::with_capacity(len);
         let old_cells = Vec::with_capacity(len);
         let neighbors = Vec::with_capacity(len);
 
@@ -54,13 +54,17 @@ impl<C, N> SquareGrid<C, N>
 
     fn init(&mut self) {
 
-        for offset in 0 .. self.cells.len() {
+        for offset in 0 .. self.rows * self.cols {
 
             let coord = GridCoord::from_offset(offset as i32, self.rows, self.cols);
 
             // init neighbors
             let neighbors = self.get_neighbors(&coord);
             self.neighbors.push(neighbors);
+
+            // init cells
+            self.cells.push(C::with_coord(coord));
+
         }
     }
 
@@ -92,7 +96,7 @@ impl<C, N> SquareGrid<C, N>
     }
 
     #[inline]
-    pub fn offset(&self, coord: &GridCoord) -> usize {
+    pub fn offset<Crd: Coord>(&self, coord: &Crd) -> usize {
         (coord.y() * self.cols + coord.x()) as usize
     }
 }
@@ -124,9 +128,24 @@ impl<C, N> Grid for SquareGrid<C, N>
         debug_assert_eq!(self.dimensions().x(), other.dimensions().x());
         debug_assert_eq!(self.dimensions().y(), other.dimensions().y());
 
+        unimplemented!();
     }
 
-    fn cells(&self) -> &Vec<C> {
+    fn set_cells(&mut self, new_cells: Vec<Self::Cell>) {
+
+        for cell in new_cells.into_iter() {
+
+            let index;
+
+            { 
+                index = self.offset(cell.coord());
+            }
+
+            self.cells[index] = cell;
+        }
+    }
+
+    fn cells(&self) -> &Vec<Self::Cell> {
         &self.cells
     }
 
