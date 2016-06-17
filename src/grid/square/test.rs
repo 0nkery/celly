@@ -1,14 +1,11 @@
 #![cfg(test)]
-use std::collections::HashMap;
-
 use traits::Cell;
 use traits::Coord;
 use traits::Grid;
-use traits::Binary;
 use grid::nhood::MooreNhood;
 use grid::square::SquareGrid;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct MooreTestCell {
     coord: (i32, i32)
 }
@@ -50,17 +47,6 @@ impl Cell for MooreTestCell {
 
     fn coord(&self) -> &Self::Coord {
         &self.coord
-    }
-}
-
-impl Binary for MooreTestCell {
-
-    fn binary(_: &[u8]) -> Self {
-        MooreTestCell { coord: (0, 0) }
-    }
-
-    fn bytes(&self) -> &[u8] {
-
     }
 }
 

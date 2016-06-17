@@ -1,26 +1,22 @@
 #![cfg(test)]
-use std::collections::HashMap;
-
 use traits::Cell;
 use traits::Coord;
 use traits::Engine;
 use traits::ReprConsumer;
 use traits::Grid;
-use traits::Binary;
 use engine::Sequential;
 use grid::square::SquareGrid;
 use grid::nhood::MooreNhood;
-use grid::square::GridCoord;
 
 /// Implementation of Conway's Game of Life.
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 enum LifeState {
     Dead,
     Alive
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Life {
     state: LifeState,
     coord: (i32, i32)
@@ -54,9 +50,6 @@ impl Life {
     }
 }
 
-const ALIVE: &'static str = "a";
-const DEAD: &'static str = "d";
-const STATE: &'static str = "s";
 
 impl Cell for Life {
     type Coord = (i32, i32);
@@ -87,17 +80,7 @@ impl Cell for Life {
 }
 
 
-impl Binary for Life {
-
-    fn binary(bytes: &[u8]) -> Self {
-
-    }
-
-    fn bytes(&self) -> &[u8] {
-
-    }
-}
-
+use test_helpers::to_cell;
 
 struct SpinnerTestConsumer {
     vertical: bool
@@ -120,25 +103,25 @@ impl ReprConsumer for SpinnerTestConsumer {
         let dead_cells_count =
             grid.cells()
                 .iter()
-                .map(|c| Life::binary(c.bytes()))
-                .filter(|c| c.state == LifeState::Dead).count();
+                .map(|c| to_cell(c))
+                .filter(|c: &Life| c.state == LifeState::Dead).count();
         assert_eq!(dead_cells_count, 6);
 
-        let alive_cells = 
+        let alive_cells = ||
             grid.cells()
                 .iter()
-                .map(|c| Life::binary(c.bytes()))
-                .filter(|c| c.state == LifeState::Alive);
-        assert_eq!(alive_cells.count(), 3);
+                .map(|c| to_cell(c))
+                .filter(|c: &Life| c.state == LifeState::Alive);
+        assert_eq!(alive_cells().count(), 3);
 
         self.vertical = !self.vertical;
 
         // if spinner is in vertical state
-        if alive_cells.all(|c| c.coord.x() == 1) {
+        if alive_cells().all(|c| c.coord.x() == 1) {
             assert!(self.vertical);
         }
         // if spinner is in horizontal state
-        if alive_cells.all(|c| c.coord.y() == 1) {
+        if alive_cells().all(|c| c.coord.y() == 1) {
             assert!(!self.vertical);
         }
     }
@@ -153,11 +136,10 @@ fn test_game_of_life() {
     // Should be in default state
     let default_state = LifeState::Dead;
 
-    assert!(
-        grid.cells()
-            .iter().map(|c| Life::binary(c.bytes()))
-            .all(|c| c.state == default_state)
-    );
+    assert!(grid.cells()
+                .iter()
+                .map(|c| to_cell(c))
+                .all(|c: Life| c.state == default_state));
 
     // Vertical spinner
     // D | A | D

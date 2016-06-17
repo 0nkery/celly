@@ -1,9 +1,4 @@
 #![cfg(test)]
-
-use std::collections::HashMap;
-use std::str::FromStr;
-
-use traits::Binary;
 use traits::Cell;
 use traits::Coord;
 use traits::Grid;
@@ -11,13 +6,12 @@ use traits::Engine;
 use traits::ReprConsumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
-use grid::square::GridCoord;
 use grid::square::SquareGrid;
 
 /// Implementation of [HPP model](https://en.wikipedia.org/wiki/HPP_model).
 /// Assumes Von Nuemann's neighborhood.
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 enum Stage {
     Collision,
     Transport
@@ -62,23 +56,11 @@ impl Direction {
 }
 
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 struct HPP {
     particles: [bool; 4],
     stage: Stage,
     coord: (i32, i32)
-}
-
-
-impl Binary for HPP {
-
-    fn binary(bytes: &[u8]) -> Self {
-
-    }
-
-    fn bytes(&self) -> &[u8] {
-
-    }
 }
 
 
@@ -202,6 +184,8 @@ impl HPP {
 #[derive(Debug)]
 struct HPPTestConsumer;
 
+use test_helpers::to_cell;
+
 
 impl HPPTestConsumer {
     
@@ -214,8 +198,8 @@ impl HPPTestConsumer {
                                  direction: &Direction) -> i32 {
 
         cells.iter()
-             .map(|c| HPP::binary(c.bytes()))
-             .filter(|c| c.particle(direction) == true)
+             .map(|c| to_cell(c))
+             .filter(|c: &HPP| c.particle(direction) == true)
              .count() as i32
     }
 
@@ -226,7 +210,8 @@ impl HPPTestConsumer {
         let found = cells.iter()
                          .find(|c| c.coord().x() == x && c.coord().y() == y)
                          .unwrap();
-        HPP::binary(found.bytes())
+
+        to_cell(found)
     }
 
     fn test_collision<G: Grid>(&self, grid: &G) {
@@ -282,8 +267,9 @@ impl HPPTestConsumer {
 
             for x in 0 .. 3 {
                 let cell = self.find_cell(grid.cells(), x, y);
+                let directions = cell.directions();
                 let maybe_particle = 
-                    cell.directions().iter().find(|d| cell.particle(d));
+                    directions.iter().find(|d| cell.particle(d));
 
                 let to_print = match maybe_particle {
                     Some(&Direction::Up) => " ^ |",
@@ -308,7 +294,7 @@ impl ReprConsumer for HPPTestConsumer {
         self.pretty_print(grid);
 
         // We are testing previous state.
-        let first = HPP::binary(grid.cells()[0].bytes());
+        let first: HPP = to_cell(&grid.cells()[0]);
 
         match first.stage {
             Stage::Collision => self.test_transport(grid),
@@ -344,8 +330,8 @@ fn test_particles() {
     let right_particles_count = 
         grid.cells()
             .iter()
-            .map(|c| HPP::binary(c.bytes()))
-            .filter(|c| c.particle(&Direction::Right) == true)
+            .map(|c| to_cell(c))
+            .filter(|c: &HPP| c.particle(&Direction::Right) == true)
             .count();
     assert_eq!(right_particles_count, 2);
 
