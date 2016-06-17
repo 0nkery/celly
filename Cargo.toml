@@ -4,3 +4,8 @@ version = "0.3.2"
 authors = ["Dmitry Shlagoff <wessmoke@gmail.com>"]
 
 [dependencies]
+serde = "0.7"
+serde_macros = "0.7"
+
+[dev-dependencies]
+bincode = { version = "0.5", features = ["serde"] }
