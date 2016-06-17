@@ -8,6 +8,7 @@ pub trait Cell: Clone + Serialize + Deserialize {
 
     fn with_coord<C: Coord>(C) -> Self;
     fn coord(&self) -> &Self::Coord;
+    fn set_coord<C: Coord>(&mut self, &C);
 }
 
 pub trait Nhood {

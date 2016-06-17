@@ -117,7 +117,8 @@ impl<C, N> Grid for SquareGrid<C, N>
             let ref neighbors = self.neighbors[cell_no];
             let neighbors_iter = self.neighbors_iter(&self.old_cells, &neighbors);
 
-            let new_cell = cell.step(neighbors_iter);
+            let mut new_cell = cell.step(neighbors_iter);
+            new_cell.set_coord(cell.coord());
 
             self.cells[cell_no] = new_cell;
         }

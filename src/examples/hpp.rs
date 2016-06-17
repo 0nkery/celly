@@ -87,6 +87,10 @@ impl Cell for HPP {
     fn coord(&self) -> &Self::Coord {
         &self.coord
     }
+
+    fn set_coord<C: Coord>(&mut self, coord: &C) {
+        self.coord = (coord.x(), coord.y());
+    }
 }
 
 
@@ -206,6 +210,8 @@ impl HPPTestConsumer {
     fn find_cell<C: Cell>(&self,
                           cells: &Vec<C>,
                           x: i32, y: i32) -> HPP {
+
+        assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
 
         let found = cells.iter()
                          .find(|c| c.coord().x() == x && c.coord().y() == y)

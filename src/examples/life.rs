@@ -77,6 +77,10 @@ impl Cell for Life {
     fn coord(&self) -> &Self::Coord {
         &self.coord
     }
+
+    fn set_coord<C: Coord>(&mut self, coord: &C) {
+        self.coord = (coord.x(), coord.y());
+    }
 }
 
 
