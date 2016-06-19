@@ -225,7 +225,6 @@ impl HPPRulesTestConsumer {
     }
 
     fn test_collision<G: Grid>(&self, grid: &G) {
-        println!("Collision");
 
         let left_particle_count = 
             self.particles_count(&grid.cells(), &Direction::Left);
@@ -257,7 +256,6 @@ impl HPPRulesTestConsumer {
     }
 
     fn test_transport<G: Grid>(&self, grid: &G) {
-        println!("Transport");
 
         let simple_move_to_right = self.find_cell(&grid.cells(), 1, 2);
         assert_eq!(simple_move_to_right.particle(&Direction::Right), true);
@@ -415,8 +413,6 @@ impl HPPSpreadTestConsumer {
     }
 
     fn test_collision<G: Grid>(&mut self, grid: &G) {
-        println!("Collision");
-        println!("{} {:?}", self.cur_y, self.cur_direction);
 
         if self.cur_y == 0 {
             self.cur_direction = Direction::Down;
@@ -436,8 +432,6 @@ impl HPPSpreadTestConsumer {
     }
 
     fn test_transport<G: Grid>(&mut self, grid: &G) {
-        println!("Transport");
-        println!("{} {:?}", self.cur_y, self.cur_direction);
 
         let particles_count = 
             self.particles_count(&grid.cells(), &self.cur_direction);
