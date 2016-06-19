@@ -1,5 +1,8 @@
 [package]
 name = "celly"
+description = "Cellular automaton library."
+repository = "https://github.com/0nkery/celly"
+licence = "MIT"
 version = "0.4.3"
 authors = ["Dmitry Shlagoff <wessmoke@gmail.com>"]
 
