@@ -13,7 +13,9 @@ impl GridCoord {
     #[inline]
     pub fn from_offset(offset: i32, rows: i32, cols: i32) -> GridCoord {
         let col = offset % cols;
-        let row = (offset - col) / rows;
+        let row = (offset - col) / cols;
+
+        debug_assert!(row < rows);
         
         GridCoord {
             x: col,
@@ -56,9 +58,19 @@ mod tests {
         assert_eq!(c.x(), 0);
         assert_eq!(c.y(), 1);
 
-        let c = GridCoord::from_offset(100, 10, 10);
-        assert_eq!(c.x(), 0);
-        assert_eq!(c.y(), 10);
+        let c = GridCoord::from_offset(99, 10, 10);
+        assert_eq!(c.x(), 9);
+        assert_eq!(c.y(), 9);
+
+        let c = GridCoord::from_offset(55, 5, 12);
+        assert_eq!(c.x(), 7);
+        assert_eq!(c.y(), 4);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_wrong_offset() {
+        GridCoord::from_offset(100, 10, 10);
     }
 
     #[test]
