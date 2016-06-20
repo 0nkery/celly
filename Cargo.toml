@@ -11,6 +11,5 @@ serde = "0.7"
 serde_macros = "0.7"
 
 [dev-dependencies.bincode]
-git = "https://github.com/0nkery/bincode"
 version = "0.5"
 features = ["serde"]
