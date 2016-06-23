@@ -8,7 +8,7 @@ authors = ["Dmitry Shlagoff <wessmoke@gmail.com>"]
 
 [dependencies]
 serde = "0.7"
-serde_macros = "0.7"
+serde_macros = { git = "https://github.com/serde-rs/serde" }
 
 [dev-dependencies.bincode]
 version = "0.5"
