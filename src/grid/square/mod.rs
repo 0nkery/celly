@@ -124,14 +124,6 @@ impl<C, N> Grid for SquareGrid<C, N>
         }
     }
 
-    fn restore<G: Grid>(&mut self, other: &G) {
-
-        debug_assert_eq!(self.dimensions().x(), other.dimensions().x());
-        debug_assert_eq!(self.dimensions().y(), other.dimensions().y());
-
-        unimplemented!();
-    }
-
     fn set_cells(&mut self, new_cells: Vec<Self::Cell>) {
 
         for cell in new_cells.into_iter() {

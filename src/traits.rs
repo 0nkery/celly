@@ -36,7 +36,6 @@ pub trait Grid {
     fn cells(&self) -> &Vec<Self::Cell>;
     fn dimensions(&self) -> Self::Coord;
 
-    fn restore<G: Grid>(&mut self, &G);
     fn set_cells(&mut self, Vec<Self::Cell>);
 }
 
