@@ -3,7 +3,7 @@ use traits::Cell;
 use traits::Coord;
 use traits::Grid;
 use traits::Engine;
-use traits::ReprConsumer;
+use traits::Consumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::square::SquareGrid;
@@ -297,7 +297,7 @@ impl HPPRulesTestConsumer {
     }
 }
 
-impl ReprConsumer for HPPRulesTestConsumer {
+impl Consumer for HPPRulesTestConsumer {
 
     fn consume<G: Grid>(&mut self, grid: &G) {
         assert_eq!(grid.cells().len(), 9);
@@ -451,7 +451,7 @@ impl HPPSpreadTestConsumer {
     }
 }
 
-impl ReprConsumer for HPPSpreadTestConsumer {
+impl Consumer for HPPSpreadTestConsumer {
 
     fn consume<G: Grid>(&mut self, grid: &G) {
         assert_eq!(grid.cells().len(), 25);

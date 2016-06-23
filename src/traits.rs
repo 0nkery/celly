@@ -39,7 +39,7 @@ pub trait Grid {
     fn set_cells(&mut self, Vec<Self::Cell>);
 }
 
-pub trait ReprConsumer {
+pub trait Consumer {
     fn consume<G: Grid>(&mut self, repr: &G);
 }
 

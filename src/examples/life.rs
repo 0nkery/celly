@@ -2,7 +2,7 @@
 use traits::Cell;
 use traits::Coord;
 use traits::Engine;
-use traits::ReprConsumer;
+use traits::Consumer;
 use traits::Grid;
 use engine::Sequential;
 use grid::square::SquareGrid;
@@ -99,7 +99,7 @@ impl SpinnerTestConsumer {
 }
 
 
-impl ReprConsumer for SpinnerTestConsumer {
+impl Consumer for SpinnerTestConsumer {
 
     fn consume<G: Grid>(&mut self, grid: &G) {
         assert_eq!(grid.cells().len(), 9);
