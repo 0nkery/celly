@@ -103,7 +103,7 @@ impl Consumer for SpinnerTestConsumer {
 
     type Cell = Life;
 
-    fn consume<G: Grid>(&mut self, grid: &G) {
+    fn consume<G: Grid>(&mut self, grid: &mut G) {
         assert_eq!(grid.cells().len(), 9);
 
         let dead_cells_count =
