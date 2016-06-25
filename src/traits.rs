@@ -40,7 +40,9 @@ pub trait Grid {
 }
 
 pub trait Consumer {
-    fn consume<G: Grid>(&mut self, repr: &G);
+    type Cell: Cell;
+
+    fn consume<G: Grid<Cell=Self::Cell>>(&mut self, repr: &G);
 }
 
 pub trait Engine {
