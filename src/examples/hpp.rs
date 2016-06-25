@@ -299,6 +299,8 @@ impl HPPRulesTestConsumer {
 
 impl Consumer for HPPRulesTestConsumer {
 
+    type Cell = HPP;
+
     fn consume<G: Grid>(&mut self, grid: &G) {
         assert_eq!(grid.cells().len(), 9);
 
@@ -452,6 +454,8 @@ impl HPPSpreadTestConsumer {
 }
 
 impl Consumer for HPPSpreadTestConsumer {
+
+    type Cell = HPP;
 
     fn consume<G: Grid>(&mut self, grid: &G) {
         assert_eq!(grid.cells().len(), 25);

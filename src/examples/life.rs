@@ -101,6 +101,8 @@ impl SpinnerTestConsumer {
 
 impl Consumer for SpinnerTestConsumer {
 
+    type Cell = Life;
+
     fn consume<G: Grid>(&mut self, grid: &G) {
         assert_eq!(grid.cells().len(), 9);
 
