@@ -110,7 +110,10 @@ impl HPP {
 
                 Some(neighbor) => {
                     let opposite = direction.opposite();
-                    let head_on = self.particle(&direction) && neighbor.particle(&opposite);
+                    let head_on = self.particle(&direction) &&
+                                  neighbor.particle(&opposite) &&
+                                  !self.particle(&direction.perpendicular()) &&
+                                  !neighbor.particle(&opposite.perpendicular());
 
                     if head_on {
                         new.set_particle(&direction.perpendicular(), self.particle(&direction));
