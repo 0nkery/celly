@@ -1,3 +1,6 @@
+//! Implementation of [HPP model](https://en.wikipedia.org/wiki/HPP_model).
+//! Assumes Von Nuemann's neighborhood.
+
 #![cfg(test)]
 use traits::Cell;
 use traits::Coord;
@@ -8,8 +11,7 @@ use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::square::SquareGrid;
 
-/// Implementation of [HPP model](https://en.wikipedia.org/wiki/HPP_model).
-/// Assumes Von Nuemann's neighborhood.
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 enum Stage {
     Collision,
