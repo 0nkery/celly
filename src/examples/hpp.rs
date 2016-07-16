@@ -120,24 +120,22 @@ impl HPP {
 
             match neighbor {
 
-                Some(neighbor) => {
+                Some(_) => {
                     let opposite = direction.opposite();
-                    let head_on = self.particle(&direction) && neighbor.particle(&opposite) &&
-                                  !self.particle(&direction.perpendicular()) &&
-                                  !neighbor.particle(&opposite.perpendicular());
 
+                    let head_on = self.particle(&direction) && self.particle(&opposite) &&
+                                  !self.particle(&direction.perpendicular()) &&
+                                  !self.particle(&opposite.perpendicular());
                     if head_on {
-                        new.set_particle(&direction.perpendicular(), self.particle(&direction));
-                    } else {
-                        let particle = new.particle(&direction) || self.particle(&direction);
-                        new.set_particle(&direction, particle);
+                        new.set_particle(&direction.perpendicular(), true);
+                        new.set_particle(&opposite.perpendicular(), true);
                     }
                 }
                 // Rebound
                 None => {
-                    if self.particle(&direction) {
-                        let opposite = direction.opposite();
-                        new.set_particle(&opposite, true);
+                    let opposite = direction.opposite();
+                    if self.particle(&opposite) {
+                        new.set_particle(&direction, true);
                     }
                 }
             }
@@ -156,16 +154,12 @@ impl HPP {
 
             match neighbor {
                 Some(neighbor) => {
-                    let opposite = direction.opposite();
-
-                    if neighbor.particle(&opposite) {
-                        new.set_particle(&opposite, neighbor.particle(&opposite));
+                    if neighbor.particle(&direction) {
+                        new.set_particle(&direction, neighbor.particle(&direction));
                     }
                 }
                 None => {
-                    if self.particle(&direction) {
-                        new.set_particle(&direction, true);
-                    }
+                    new.set_particle(&direction, self.particle(&direction));
                 }
             }
         }
