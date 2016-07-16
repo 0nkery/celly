@@ -172,23 +172,13 @@ impl HPP {
     }
 
     pub fn particle(&self, direction: &Direction) -> bool {
-
-        match *direction {
-            Direction::Up => self.particles[0],
-            Direction::Left => self.particles[1],
-            Direction::Right => self.particles[2],
-            Direction::Down => self.particles[3],
-        }
+        let index = *direction as usize;
+        self.particles[index]
     }
 
     fn set_particle(&mut self, direction: &Direction, exists: bool) {
-
-        match *direction {
-            Direction::Up => self.particles[0] = exists,
-            Direction::Left => self.particles[1] = exists,
-            Direction::Right => self.particles[2] = exists,
-            Direction::Down => self.particles[3] = exists,
-        }
+        let index = *direction as usize;
+        self.particles[index] = exists;
     }
 
     #[inline]
