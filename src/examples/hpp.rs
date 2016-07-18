@@ -58,18 +58,6 @@ impl Direction {
     }
 }
 
-impl From<usize> for Direction {
-    fn from(int: usize) -> Self {
-        match int {
-            0 => Direction::Up,
-            1 => Direction::Left,
-            2 => Direction::Right,
-            3 => Direction::Down,
-            i => panic!("No associated variant to number {}.", i),
-        }
-    }
-}
-
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 struct HPP {
