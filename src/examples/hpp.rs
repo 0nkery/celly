@@ -2,6 +2,7 @@
 //! Assumes Von Nuemann's neighborhood.
 
 #![cfg(test)]
+
 use traits::Cell;
 use traits::Coord;
 use traits::Grid;
