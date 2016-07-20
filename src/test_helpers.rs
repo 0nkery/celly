@@ -1,6 +1,6 @@
 #![cfg(test)]
 use bincode::SizeLimit;
-use bincode::serde::{ serialize, deserialize };
+use bincode::serde::{serialize, deserialize};
 
 use traits::Cell;
 
