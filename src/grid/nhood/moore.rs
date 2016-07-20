@@ -10,9 +10,7 @@ pub struct MooreNhood<C: Coord> {
 
 
 impl<C: Coord> MooreNhood<C> {
-    pub fn new() -> Self {
-        MooreNhood { phantom: PhantomData }
-    }
+    pub fn new() -> Self { MooreNhood { phantom: PhantomData } }
 }
 
 impl<C: Coord> Nhood for MooreNhood<C> {
@@ -39,9 +37,7 @@ impl<C: Coord> Nhood for MooreNhood<C> {
         neighbors_coords
     }
 
-    fn neighbors_count(&self) -> usize {
-        8
-    }
+    fn neighbors_count(&self) -> usize { 8 }
 }
 
 #[cfg(test)]

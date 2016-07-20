@@ -14,7 +14,7 @@ impl Cell for MooreTestCell {
     type Coord = (i32, i32);
 
     fn step<'a, I>(&self, neighbors: I) -> Self
-        where I: Iterator<Item = Option<&'a Self>>
+        where I: Iterator<Item = Option<&'a Self>>,
     {
 
         // Initial value should be copied
@@ -27,10 +27,10 @@ impl Cell for MooreTestCell {
             match neighbor {
                 None => {
                     none_cnt += 1;
-                }
+                },
                 Some(_) => {
                     neighbors_cnt += 1;
-                }
+                },
             };
             total += 1;
         }
@@ -42,17 +42,11 @@ impl Cell for MooreTestCell {
         self.clone()
     }
 
-    fn with_coord<C: Coord>(coord: C) -> Self {
-        MooreTestCell { coord: (coord.x(), coord.y()) }
-    }
+    fn with_coord<C: Coord>(coord: C) -> Self { MooreTestCell { coord: (coord.x(), coord.y()) } }
 
-    fn coord(&self) -> &Self::Coord {
-        &self.coord
-    }
+    fn coord(&self) -> &Self::Coord { &self.coord }
 
-    fn set_coord<C: Coord>(&mut self, coord: &C) {
-        self.coord = (coord.x(), coord.y());
-    }
+    fn set_coord<C: Coord>(&mut self, coord: &C) { self.coord = (coord.x(), coord.y()); }
 }
 
 

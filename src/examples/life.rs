@@ -23,7 +23,7 @@ struct Life {
 
 impl Life {
     fn alive_count<'a, I>(&self, neighbors: I) -> i32
-        where I: Iterator<Item = Option<&'a Self>>
+        where I: Iterator<Item = Option<&'a Self>>,
     {
 
         neighbors.filter(|n| match *n {
@@ -55,7 +55,7 @@ impl Cell for Life {
     type Coord = (i32, i32);
 
     fn step<'a, I>(&self, neighbors: I) -> Self
-        where I: Iterator<Item = Option<&'a Self>>
+        where I: Iterator<Item = Option<&'a Self>>,
     {
 
         let alive_count = self.alive_count(neighbors);
@@ -78,13 +78,9 @@ impl Cell for Life {
         }
     }
 
-    fn coord(&self) -> &Self::Coord {
-        &self.coord
-    }
+    fn coord(&self) -> &Self::Coord { &self.coord }
 
-    fn set_coord<C: Coord>(&mut self, coord: &C) {
-        self.coord = (coord.x(), coord.y());
-    }
+    fn set_coord<C: Coord>(&mut self, coord: &C) { self.coord = (coord.x(), coord.y()); }
 }
 
 
@@ -96,9 +92,7 @@ struct SpinnerTestConsumer {
 
 
 impl SpinnerTestConsumer {
-    pub fn new() -> Self {
-        SpinnerTestConsumer { vertical: true }
-    }
+    pub fn new() -> Self { SpinnerTestConsumer { vertical: true } }
 }
 
 

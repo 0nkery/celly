@@ -22,17 +22,11 @@ impl GridCoord {
 
 
 impl Coord for GridCoord {
-    fn from_2d(x: i32, y: i32) -> Self {
-        GridCoord { x: x, y: y }
-    }
+    fn from_2d(x: i32, y: i32) -> Self { GridCoord { x: x, y: y } }
 
-    fn x(&self) -> i32 {
-        self.x
-    }
+    fn x(&self) -> i32 { self.x }
 
-    fn y(&self) -> i32 {
-        self.y
-    }
+    fn y(&self) -> i32 { self.y }
 }
 
 
@@ -65,9 +59,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_wrong_offset() {
-        GridCoord::from_offset(100, 10, 10);
-    }
+    fn test_wrong_offset() { GridCoord::from_offset(100, 10, 10); }
 
     #[test]
     fn test_with_moore_nhood() {

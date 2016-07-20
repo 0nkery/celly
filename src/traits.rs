@@ -1,9 +1,10 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 pub trait Cell: Clone + Serialize + Deserialize {
     type Coord: Coord;
 
-    fn step<'a, I>(&'a self, neighbors: I) -> Self where I: Iterator<Item = Option<&'a Self>>;
+    fn step<'a, I>(&'a self, neighbors: I) -> Self
+        where I: Iterator<Item = Option<&'a Self>>;
 
     fn with_coord<C: Coord>(C) -> Self;
     fn coord(&self) -> &Self::Coord;
@@ -22,9 +23,7 @@ pub trait Coord: Clone + Serialize + Deserialize {
 
     fn x(&self) -> i32;
     fn y(&self) -> i32;
-    fn z(&self) -> i32 {
-        0
-    }
+    fn z(&self) -> i32 { 0 }
 }
 
 pub trait Grid {

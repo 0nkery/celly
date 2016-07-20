@@ -10,9 +10,7 @@ pub struct VonNeumannNhood<C: Coord> {
 
 
 impl<C: Coord> VonNeumannNhood<C> {
-    pub fn new() -> Self {
-        VonNeumannNhood { phantom: PhantomData }
-    }
+    pub fn new() -> Self { VonNeumannNhood { phantom: PhantomData } }
 }
 
 impl<C: Coord> Nhood for VonNeumannNhood<C> {
@@ -35,9 +33,7 @@ impl<C: Coord> Nhood for VonNeumannNhood<C> {
         neighbors_coords
     }
 
-    fn neighbors_count(&self) -> usize {
-        4
-    }
+    fn neighbors_count(&self) -> usize { 4 }
 }
 
 

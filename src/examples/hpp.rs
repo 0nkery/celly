@@ -21,9 +21,7 @@ enum Stage {
 
 
 impl Default for Stage {
-    fn default() -> Self {
-        Stage::Collision
-    }
+    fn default() -> Self { Stage::Collision }
 }
 
 
@@ -71,7 +69,7 @@ impl Cell for HPP {
     type Coord = (i32, i32);
 
     fn step<'a, I>(&'a self, neighbors: I) -> Self
-        where I: Iterator<Item = Option<&'a Self>>
+        where I: Iterator<Item = Option<&'a Self>>,
     {
 
         match self.stage {
@@ -88,19 +86,15 @@ impl Cell for HPP {
         }
     }
 
-    fn coord(&self) -> &Self::Coord {
-        &self.coord
-    }
+    fn coord(&self) -> &Self::Coord { &self.coord }
 
-    fn set_coord<C: Coord>(&mut self, coord: &C) {
-        self.coord = (coord.x(), coord.y());
-    }
+    fn set_coord<C: Coord>(&mut self, coord: &C) { self.coord = (coord.x(), coord.y()); }
 }
 
 
 impl HPP {
     fn collision<'a, I>(&self, neighbors: I) -> Self
-        where I: Iterator<Item = Option<&'a Self>>
+        where I: Iterator<Item = Option<&'a Self>>,
     {
 
         let mut new = HPP { stage: Stage::Transport, ..Default::default() };
@@ -125,7 +119,7 @@ impl HPP {
                         let exists = new.particle(&direction) || self.particle(&direction);
                         new.set_particle(&direction, exists);
                     }
-                }
+                },
                 // Rebound
                 None => {
                     let opposite = direction.opposite();
@@ -138,7 +132,7 @@ impl HPP {
                             new.set_particle(&opposite, true);
                         }
                     }
-                }
+                },
             }
         }
 
@@ -146,7 +140,7 @@ impl HPP {
     }
 
     fn transport<'a, I>(&self, neighbors: I) -> Self
-        where I: Iterator<Item = Option<&'a Self>>
+        where I: Iterator<Item = Option<&'a Self>>,
     {
 
         let mut new = HPP { stage: Stage::Collision, ..Default::default() };
@@ -158,12 +152,12 @@ impl HPP {
                     if neighbor.particle(&opposite) {
                         new.set_particle(&opposite, true);
                     }
-                }
+                },
                 None => {
                     if self.particle(&direction) {
                         new.set_particle(&direction, true);
                     }
-                }
+                },
             }
         }
 
@@ -220,28 +214,28 @@ fn pretty_print<G: Grid>(grid: &G) {
                             } else {
                                 "   |"
                             }
-                        }
+                        },
                         Direction::Right => {
                             if cell.particle(d) {
                                 "> "
                             } else {
                                 "  "
                             }
-                        }
+                        },
                         Direction::Left => {
                             if cell.particle(d) {
                                 "<|"
                             } else {
                                 " |"
                             }
-                        }
+                        },
                         Direction::Up => {
                             if cell.particle(d) {
                                 " ^ |"
                             } else {
                                 "   |"
                             }
-                        }
+                        },
                     };
                     print!("{}", to_print);
                 }
@@ -263,9 +257,7 @@ use test_helpers::to_cell;
 
 
 impl HPPRulesTestConsumer {
-    pub fn new() -> Self {
-        HPPRulesTestConsumer {}
-    }
+    pub fn new() -> Self { HPPRulesTestConsumer {} }
 
     fn particles_count<C: Cell>(&self, cells: &Vec<C>, direction: &Direction) -> i32 {
 

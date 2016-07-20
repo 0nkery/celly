@@ -35,11 +35,11 @@ impl<'a, C: Cell> Iterator for Iter<'a, C> {
                     Some(index) => Some(Some(&self.cells[index])),
                     None => Some(None),
                 }
-            }
+            },
             _ => {
                 self.index = 0;
                 None
-            }
+            },
         };
         self.index += 1;
 
