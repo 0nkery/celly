@@ -3,18 +3,19 @@ use traits::Cell;
 use traits::Coord;
 use traits::Grid;
 use grid::nhood::MooreNhood;
-use grid::square::SquareGrid;
+use grid::twodim::SquareGrid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct MooreTestCell {
-    coord: (i32, i32)
+    coord: (i32, i32),
 }
 
 impl Cell for MooreTestCell {
     type Coord = (i32, i32);
 
-    fn step<'a, I>(&self, neighbors: I) -> Self 
-        where I: Iterator<Item=Option<&'a Self>> {
+    fn step<'a, I>(&self, neighbors: I) -> Self
+        where I: Iterator<Item = Option<&'a Self>>
+    {
 
         // Initial value should be copied
         // There should be 3 neighbors and 5 None values
@@ -26,7 +27,7 @@ impl Cell for MooreTestCell {
             match neighbor {
                 None => {
                     none_cnt += 1;
-                },
+                }
                 Some(_) => {
                     neighbors_cnt += 1;
                 }

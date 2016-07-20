@@ -10,7 +10,7 @@ use traits::Engine;
 use traits::Consumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
-use grid::square::SquareGrid;
+use grid::twodim::SquareGrid;
 
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]

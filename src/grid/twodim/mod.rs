@@ -13,22 +13,22 @@ pub use self::coord::GridCoord;
 
 pub struct SquareGrid<C, N>
     where C: Cell,
-          N: Nhood<Coord=GridCoord> {
-
+          N: Nhood<Coord = GridCoord>
+{
     cells: Vec<C>,
     old_cells: Vec<C>,
     nhood: N,
     neighbors: Vec<Vec<Option<usize>>>,
     dimensions: GridCoord,
     rows: i32,
-    cols: i32
+    cols: i32,
 }
 
 
 impl<C, N> SquareGrid<C, N>
     where C: Cell,
-          N: Nhood<Coord=GridCoord> {
-
+          N: Nhood<Coord = GridCoord>
+{
     pub fn new(rows: i32, cols: i32, nhood: N) -> Self {
 
         let len = (rows * cols) as usize;
@@ -44,7 +44,7 @@ impl<C, N> SquareGrid<C, N>
             neighbors: neighbors,
             rows: rows,
             cols: cols,
-            dimensions: GridCoord::from_2d(cols, rows)
+            dimensions: GridCoord::from_2d(cols, rows),
         };
 
         grid.init();
@@ -54,7 +54,7 @@ impl<C, N> SquareGrid<C, N>
 
     fn init(&mut self) {
 
-        for offset in 0 .. self.rows * self.cols {
+        for offset in 0..self.rows * self.cols {
 
             let coord = GridCoord::from_offset(offset as i32, self.rows, self.cols);
 
@@ -75,12 +75,10 @@ impl<C, N> SquareGrid<C, N>
 
         for coord in self.nhood.neighbors(coord).iter() {
 
-            if coord.x() >= 0 && coord.x() < self.cols &&
-               coord.y() >= 0 && coord.y() < self.rows {
+            if coord.x() >= 0 && coord.x() < self.cols && coord.y() >= 0 && coord.y() < self.rows {
 
                 neighbors.push(Some(self.offset(coord)));
-            }
-            else {
+            } else {
                 neighbors.push(None);
             }
         }
@@ -90,7 +88,8 @@ impl<C, N> SquareGrid<C, N>
 
     fn neighbors_iter<'b>(&self,
                           cells: &'b Vec<C>,
-                          neighbors: &'b Vec<Option<usize>>) -> Iter<'b, C> {
+                          neighbors: &'b Vec<Option<usize>>)
+                          -> Iter<'b, C> {
 
         Iter::new(cells, neighbors, self.nhood.neighbors_count())
     }
@@ -104,8 +103,8 @@ impl<C, N> SquareGrid<C, N>
 
 impl<C, N> Grid for SquareGrid<C, N>
     where C: Cell,
-          N: Nhood<Coord=GridCoord> {
-
+          N: Nhood<Coord = GridCoord>
+{
     type Cell = C;
     type Coord = GridCoord;
 
@@ -130,7 +129,7 @@ impl<C, N> Grid for SquareGrid<C, N>
 
             let index;
 
-            { 
+            {
                 index = self.offset(cell.coord());
             }
 

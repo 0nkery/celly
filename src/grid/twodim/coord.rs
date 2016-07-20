@@ -9,34 +9,30 @@ pub struct GridCoord {
 
 
 impl GridCoord {
-
     #[inline]
     pub fn from_offset(offset: i32, rows: i32, cols: i32) -> GridCoord {
         let col = offset % cols;
         let row = (offset - col) / cols;
 
         debug_assert!(row < rows);
-        
-        GridCoord {
-            x: col,
-            y: row,
-        }
+
+        GridCoord { x: col, y: row }
     }
 }
 
 
 impl Coord for GridCoord {
-
     fn from_2d(x: i32, y: i32) -> Self {
-        GridCoord {
-            x: x,
-            y: y,
-        }
+        GridCoord { x: x, y: y }
     }
 
-    fn x(&self) -> i32 { self.x }
+    fn x(&self) -> i32 {
+        self.x
+    }
 
-    fn y(&self) -> i32 { self.y }
+    fn y(&self) -> i32 {
+        self.y
+    }
 }
 
 

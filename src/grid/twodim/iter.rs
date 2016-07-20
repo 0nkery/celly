@@ -5,21 +5,18 @@ pub struct Iter<'a, C: 'a> {
     cells: &'a Vec<C>,
     neighbors: &'a Vec<Option<usize>>,
     index: usize,
-    count: usize
+    count: usize,
 }
 
 
 impl<'a, C> Iter<'a, C> {
-
-    pub fn new(cells: &'a Vec<C>,
-           neighbors: &'a Vec<Option<usize>>,
-           count: usize) -> Self {
+    pub fn new(cells: &'a Vec<C>, neighbors: &'a Vec<Option<usize>>, count: usize) -> Self {
 
         Iter {
             cells: cells,
             neighbors: neighbors,
             count: count,
-            index: 0
+            index: 0,
         }
     }
 }
@@ -31,14 +28,14 @@ impl<'a, C: Cell> Iterator for Iter<'a, C> {
     fn next(&mut self) -> Option<Self::Item> {
 
         let next = match self.index {
-            i @ _  if i < self.count => {
+            i @ _ if i < self.count => {
 
                 let maybe_index = self.neighbors[i];
                 match maybe_index {
                     Some(index) => Some(Some(&self.cells[index])),
-                    None => Some(None)
+                    None => Some(None),
                 }
-            },
+            }
             _ => {
                 self.index = 0;
                 None

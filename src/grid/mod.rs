@@ -1,2 +1,2 @@
-pub mod square;
+pub mod twodim;
 pub mod nhood;
