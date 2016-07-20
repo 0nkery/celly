@@ -14,7 +14,6 @@ pub trait Nhood {
     type Coord: Coord;
 
     fn neighbors(&self, &Self::Coord) -> Vec<Self::Coord>;
-
     fn neighbors_count(&self) -> usize;
 }
 
@@ -43,9 +42,9 @@ pub trait Grid {
 pub trait Consumer {
     type Cell: Cell;
 
-    fn consume<G: Grid<Cell = Self::Cell>>(&mut self, repr: &mut G);
+    fn consume<G: Grid<Cell = Self::Cell>>(&mut self, &mut G);
 }
 
 pub trait Engine {
-    fn run_times(&mut self, times: i64);
+    fn run_times(&mut self, i64);
 }
