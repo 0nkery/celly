@@ -79,7 +79,6 @@ impl<C, N> TwodimGrid<C, N>
         for coord in self.nhood.neighbors(coord).iter() {
 
             if coord.x() >= 0 && coord.x() < self.cols && coord.y() >= 0 && coord.y() < self.rows {
-
                 neighbors.push(Some(self.offset(coord)));
             } else {
                 neighbors.push(None);
