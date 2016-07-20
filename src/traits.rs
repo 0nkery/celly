@@ -1,9 +1,14 @@
 use serde::{Deserialize, Serialize};
 
+pub trait EvolutionState {
+    fn update(&mut self);
+}
+
 pub trait Cell: Clone + Serialize + Deserialize {
     type Coord: Coord;
+    type State: EvolutionState;
 
-    fn step<'a, I>(&'a self, neighbors: I) -> Self
+    fn step<'a, I>(&'a self, neighbors: I, &Option<Self::State>) -> Self
         where I: Iterator<Item = Option<&'a Self>>;
 
     fn with_coord<C: Coord>(C) -> Self;
