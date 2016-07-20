@@ -8,7 +8,7 @@ pub trait Cell: Clone + Serialize + Deserialize {
     type Coord: Coord;
     type State: EvolutionState;
 
-    fn update<'a, I>(&'a self, neighbors: I, &Option<Self::State>) -> Self
+    fn update<'a, I>(&'a self, neighbors: I, &Self::State) -> Self
         where I: Iterator<Item = Option<&'a Self>>;
 
     fn with_coord<C: Coord>(C) -> Self;
@@ -37,6 +37,7 @@ pub trait Grid {
 
     fn update(&mut self);
 
+    fn state(&self) -> &<<Self as Grid>::Cell as Cell>::State;
     fn cells(&self) -> &Vec<Self::Cell>;
     fn dimensions(&self) -> Self::Coord;
 
@@ -46,7 +47,8 @@ pub trait Grid {
 pub trait Consumer {
     type Cell: Cell;
 
-    fn consume<G: Grid<Cell = Self::Cell>>(&mut self, &mut G);
+    fn consume<G>(&mut self, &mut G)
+        where G: Grid<Cell = Self::Cell>;
 }
 
 pub trait Engine {

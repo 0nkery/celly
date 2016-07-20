@@ -20,7 +20,7 @@ pub struct TwodimGrid<C, N>
 {
     cells: Vec<C>,
     old_cells: Vec<C>,
-    evolution_state: Option<C::State>,
+    evolution_state: C::State,
     nhood: N,
     neighbors: Vec<Vec<Option<usize>>>,
     dimensions: GridCoord,
@@ -33,7 +33,7 @@ impl<C, N> TwodimGrid<C, N>
     where C: Cell,
           N: Nhood<Coord = GridCoord>,
 {
-    pub fn new(rows: i32, cols: i32, nhood: N, state: Option<C::State>) -> Self {
+    pub fn new(rows: i32, cols: i32, nhood: N, state: C::State) -> Self {
 
         let len = (rows * cols) as usize;
 
@@ -116,10 +116,6 @@ impl<C, N> Grid for TwodimGrid<C, N>
     fn update(&mut self) {
         mem::swap(&mut self.cells, &mut self.old_cells);
 
-        if let Some(ref mut state) = self.evolution_state {
-            state.update();
-        }
-
         for (cell_no, cell) in self.old_cells.iter().enumerate() {
 
             let ref neighbors = self.neighbors[cell_no];
@@ -130,6 +126,8 @@ impl<C, N> Grid for TwodimGrid<C, N>
 
             self.cells[cell_no] = new_cell;
         }
+
+        self.evolution_state.update();
     }
 
     fn set_cells(&mut self, new_cells: Vec<Self::Cell>) {
@@ -147,6 +145,8 @@ impl<C, N> Grid for TwodimGrid<C, N>
     }
 
     fn cells(&self) -> &Vec<Self::Cell> { &self.cells }
+
+    fn state(&self) -> &<<Self as Grid>::Cell as Cell>::State { &self.evolution_state }
 
     fn dimensions(&self) -> Self::Coord { self.dimensions.clone() }
 }

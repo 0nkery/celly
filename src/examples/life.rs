@@ -7,6 +7,7 @@ use traits::Grid;
 use engine::Sequential;
 use grid::twodim::TwodimGrid;
 use grid::nhood::MooreNhood;
+use grid::EmptyState;
 
 /// Implementation of Conway's Game of Life.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -53,8 +54,9 @@ impl Life {
 
 impl Cell for Life {
     type Coord = (i32, i32);
+    type State = EmptyState;
 
-    fn step<'a, I>(&self, neighbors: I) -> Self
+    fn update<'a, I>(&self, neighbors: I, _: &Self::State) -> Self
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
@@ -134,7 +136,7 @@ impl Consumer for SpinnerTestConsumer {
 fn test_game_of_life() {
 
     let nhood = MooreNhood::new();
-    let mut grid: TwodimGrid<Life, _> = TwodimGrid::new(3, 3, nhood);
+    let mut grid: TwodimGrid<Life, _> = TwodimGrid::new(3, 3, nhood, EmptyState);
 
     // Should be in default state
     let default_state = LifeState::Dead;

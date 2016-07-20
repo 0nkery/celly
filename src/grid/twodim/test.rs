@@ -4,6 +4,7 @@ use traits::Coord;
 use traits::Grid;
 use grid::nhood::MooreNhood;
 use grid::twodim::TwodimGrid;
+use grid::EmptyState;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct MooreTestCell {
@@ -12,8 +13,9 @@ struct MooreTestCell {
 
 impl Cell for MooreTestCell {
     type Coord = (i32, i32);
+    type State = EmptyState;
 
-    fn step<'a, I>(&self, neighbors: I) -> Self
+    fn update<'a, I>(&self, neighbors: I, _: &Self::State) -> Self
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
@@ -53,6 +55,6 @@ impl Cell for MooreTestCell {
 #[test]
 fn test_neighbors() {
     let nhood = MooreNhood::new();
-    let mut grid: TwodimGrid<MooreTestCell, _> = TwodimGrid::new(2, 2, nhood);
-    grid.step();
+    let mut grid: TwodimGrid<MooreTestCell, _> = TwodimGrid::new(2, 2, nhood, EmptyState);
+    grid.update();
 }

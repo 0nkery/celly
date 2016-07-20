@@ -7,13 +7,13 @@ use traits::Cell;
 use traits::Coord;
 use traits::Grid;
 use traits::Engine;
+use traits::EvolutionState;
 use traits::Consumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::twodim::TwodimGrid;
 
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 enum Stage {
     Collision,
     Transport,
@@ -22,6 +22,24 @@ enum Stage {
 
 impl Default for Stage {
     fn default() -> Self { Stage::Collision }
+}
+
+
+struct HPPState {
+    stage: Stage,
+}
+
+impl HPPState {
+    fn new() -> Self { HPPState { stage: Stage::Collision } }
+}
+
+impl EvolutionState for HPPState {
+    fn update(&mut self) {
+        self.stage = match self.stage {
+            Stage::Collision => Stage::Transport,
+            Stage::Transport => Stage::Collision,
+        };
+    }
 }
 
 
@@ -60,30 +78,26 @@ impl Direction {
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 struct HPP {
     particles: [bool; 4],
-    stage: Stage,
     coord: (i32, i32),
 }
 
 
 impl Cell for HPP {
     type Coord = (i32, i32);
+    type State = HPPState;
 
-    fn step<'a, I>(&'a self, neighbors: I) -> Self
+    fn update<'a, I>(&'a self, neighbors: I, state: &Self::State) -> Self
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
-        match self.stage {
+        match state.stage {
             Stage::Collision => self.collision(neighbors),
             Stage::Transport => self.transport(neighbors),
         }
     }
 
     fn with_coord<C: Coord>(coord: C) -> Self {
-        HPP {
-            stage: Stage::Collision,
-            coord: (coord.x(), coord.y()),
-            ..Default::default()
-        }
+        HPP { coord: (coord.x(), coord.y()), ..Default::default() }
     }
 
     fn coord(&self) -> &Self::Coord { &self.coord }
@@ -97,7 +111,7 @@ impl HPP {
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
-        let mut new = HPP { stage: Stage::Transport, ..Default::default() };
+        let mut new = HPP::default();
 
         let has_head_on = |d: &Direction, op_d: &Direction| {
             self.particle(&d) && self.particle(&op_d) && !self.particle(&d.perpendicular()) &&
@@ -143,7 +157,7 @@ impl HPP {
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
-        let mut new = HPP { stage: Stage::Collision, ..Default::default() };
+        let mut new = HPP::default();
 
         for (neighbor, direction) in neighbors.zip(self.directions().iter()) {
             match neighbor {
@@ -180,6 +194,8 @@ impl HPP {
     }
 }
 
+
+use test_helpers::to_cell;
 
 fn find_cell<C: Cell>(cells: &Vec<C>, x: i32, y: i32) -> HPP {
 
@@ -253,11 +269,8 @@ fn pretty_print<G: Grid>(grid: &G) {
 #[derive(Debug)]
 struct HPPRulesTestConsumer;
 
-use test_helpers::to_cell;
-
-
 impl HPPRulesTestConsumer {
-    pub fn new() -> Self { HPPRulesTestConsumer {} }
+    pub fn new() -> Self { HPPRulesTestConsumer }
 
     fn particles_count<C: Cell>(&self, cells: &Vec<C>, direction: &Direction) -> i32 {
 
@@ -315,15 +328,12 @@ impl HPPRulesTestConsumer {
 impl Consumer for HPPRulesTestConsumer {
     type Cell = HPP;
 
-    fn consume<G: Grid>(&mut self, grid: &mut G) {
+    fn consume<G: Grid<Cell = Self::Cell>>(&mut self, grid: &mut G) {
         assert_eq!(grid.cells().len(), 9);
 
         pretty_print(grid);
 
-        // We are testing previous state.
-        let first: HPP = to_cell(&grid.cells()[0]);
-
-        match first.stage {
+        match grid.state().stage {
             Stage::Collision => self.test_transport(grid),
             Stage::Transport => self.test_collision(grid),
         }
@@ -345,13 +355,14 @@ fn test_rules() {
     let about_to_collide = [false, true, true, false];
 
     let cells = vec![
-        HPP { stage: Stage::Collision, particles: about_to_collide, coord: (1, 0) },
-        HPP { stage: Stage::Collision, particles: left_particle, coord: (0, 1) },
-        HPP { stage: Stage::Collision, particles: right_particle, coord: (0, 2) },
+        HPP { particles: about_to_collide, coord: (1, 0) },
+        HPP { particles: left_particle, coord: (0, 1) },
+        HPP { particles: right_particle, coord: (0, 2) },
     ];
 
     let nhood = VonNeumannNhood::new();
-    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(3, 3, nhood);
+    let evolution_state = HPPState::new();
+    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(3, 3, nhood, evolution_state);
     grid.set_cells(cells);
 
     pretty_print(&grid);
@@ -430,15 +441,12 @@ impl HPPSpreadTestConsumer {
 impl Consumer for HPPSpreadTestConsumer {
     type Cell = HPP;
 
-    fn consume<G: Grid>(&mut self, grid: &mut G) {
+    fn consume<G: Grid<Cell = Self::Cell>>(&mut self, grid: &mut G) {
         assert_eq!(grid.cells().len(), 25);
 
         pretty_print(grid);
 
-        // We are testing previous state.
-        let first: HPP = to_cell(&grid.cells()[0]);
-
-        match first.stage {
+        match grid.state().stage {
             Stage::Collision => self.test_transport(grid),
             Stage::Transport => self.test_collision(grid),
         }
@@ -462,14 +470,14 @@ fn test_spread() {
     let mut cells = Vec::new();
     for x in 0..5 {
         cells.push(HPP {
-            stage: Stage::Collision,
             particles: down_particle,
             coord: (x, 0),
         });
     }
 
     let nhood = VonNeumannNhood::new();
-    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(5, 5, nhood);
+    let evolution_state = HPPState::new();
+    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(5, 5, nhood, evolution_state);
     grid.set_cells(cells);
 
     let consumer = HPPSpreadTestConsumer::new();
