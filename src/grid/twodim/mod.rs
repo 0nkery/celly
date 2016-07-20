@@ -113,7 +113,7 @@ impl<C, N> Grid for TwodimGrid<C, N>
     type Cell = C;
     type Coord = GridCoord;
 
-    fn step(&mut self) {
+    fn update(&mut self) {
         mem::swap(&mut self.cells, &mut self.old_cells);
 
         if let Some(ref mut state) = self.evolution_state {
@@ -125,7 +125,7 @@ impl<C, N> Grid for TwodimGrid<C, N>
             let ref neighbors = self.neighbors[cell_no];
             let neighbors_iter = self.neighbors_iter(&self.old_cells, &neighbors);
 
-            let mut new_cell = cell.step(neighbors_iter, &self.evolution_state);
+            let mut new_cell = cell.update(neighbors_iter, &self.evolution_state);
             new_cell.set_coord(cell.coord());
 
             self.cells[cell_no] = new_cell;

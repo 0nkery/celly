@@ -8,7 +8,7 @@ pub trait Cell: Clone + Serialize + Deserialize {
     type Coord: Coord;
     type State: EvolutionState;
 
-    fn step<'a, I>(&'a self, neighbors: I, &Option<Self::State>) -> Self
+    fn update<'a, I>(&'a self, neighbors: I, &Option<Self::State>) -> Self
         where I: Iterator<Item = Option<&'a Self>>;
 
     fn with_coord<C: Coord>(C) -> Self;
@@ -35,7 +35,7 @@ pub trait Grid {
     type Cell: Cell;
     type Coord: Coord;
 
-    fn step(&mut self);
+    fn update(&mut self);
 
     fn cells(&self) -> &Vec<Self::Cell>;
     fn dimensions(&self) -> Self::Coord;
