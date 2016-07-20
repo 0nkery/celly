@@ -2,6 +2,8 @@ mod iter;
 mod coord;
 mod test;
 
+use std::mem;
+
 use traits::Grid;
 use traits::Cell;
 use traits::Nhood;
@@ -63,8 +65,9 @@ impl<C, N> TwodimGrid<C, N>
             self.neighbors.push(neighbors);
 
             // init cells
-            self.cells.push(C::with_coord(coord));
-
+            let cell = C::with_coord(coord);
+            self.cells.push(cell.clone());
+            self.old_cells.push(cell.clone());
         }
     }
 
@@ -109,7 +112,7 @@ impl<C, N> Grid for TwodimGrid<C, N>
     type Coord = GridCoord;
 
     fn step(&mut self) {
-        self.old_cells = self.cells.clone();
+        mem::swap(&mut self.cells, &mut self.old_cells);
 
         for (cell_no, cell) in self.old_cells.iter().enumerate() {
 
