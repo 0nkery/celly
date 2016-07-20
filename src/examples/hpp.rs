@@ -10,7 +10,7 @@ use traits::Engine;
 use traits::Consumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
-use grid::twodim::SquareGrid;
+use grid::twodim::TwodimGrid;
 
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -359,7 +359,7 @@ fn test_rules() {
     ];
 
     let nhood = VonNeumannNhood::new();
-    let mut grid: SquareGrid<HPP, _> = SquareGrid::new(3, 3, nhood);
+    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(3, 3, nhood);
     grid.set_cells(cells);
 
     pretty_print(&grid);
@@ -477,7 +477,7 @@ fn test_spread() {
     }
 
     let nhood = VonNeumannNhood::new();
-    let mut grid: SquareGrid<HPP, _> = SquareGrid::new(5, 5, nhood);
+    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(5, 5, nhood);
     grid.set_cells(cells);
 
     let consumer = HPPSpreadTestConsumer::new();

@@ -3,7 +3,7 @@ use traits::Cell;
 use traits::Coord;
 use traits::Grid;
 use grid::nhood::MooreNhood;
-use grid::twodim::SquareGrid;
+use grid::twodim::TwodimGrid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct MooreTestCell {
@@ -59,6 +59,6 @@ impl Cell for MooreTestCell {
 #[test]
 fn test_neighbors() {
     let nhood = MooreNhood::new();
-    let mut grid: SquareGrid<MooreTestCell, _> = SquareGrid::new(2, 2, nhood);
+    let mut grid: TwodimGrid<MooreTestCell, _> = TwodimGrid::new(2, 2, nhood);
     grid.step();
 }

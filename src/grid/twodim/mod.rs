@@ -11,7 +11,7 @@ use self::iter::Iter;
 pub use self::coord::GridCoord;
 
 
-pub struct SquareGrid<C, N>
+pub struct TwodimGrid<C, N>
     where C: Cell,
           N: Nhood<Coord = GridCoord>
 {
@@ -25,7 +25,7 @@ pub struct SquareGrid<C, N>
 }
 
 
-impl<C, N> SquareGrid<C, N>
+impl<C, N> TwodimGrid<C, N>
     where C: Cell,
           N: Nhood<Coord = GridCoord>
 {
@@ -37,7 +37,7 @@ impl<C, N> SquareGrid<C, N>
         let old_cells = Vec::with_capacity(len);
         let neighbors = Vec::with_capacity(len);
 
-        let mut grid = SquareGrid {
+        let mut grid = TwodimGrid {
             cells: cells,
             old_cells: old_cells,
             nhood: nhood,
@@ -101,7 +101,7 @@ impl<C, N> SquareGrid<C, N>
 }
 
 
-impl<C, N> Grid for SquareGrid<C, N>
+impl<C, N> Grid for TwodimGrid<C, N>
     where C: Cell,
           N: Nhood<Coord = GridCoord>
 {

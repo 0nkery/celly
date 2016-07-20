@@ -5,7 +5,7 @@ use traits::Engine;
 use traits::Consumer;
 use traits::Grid;
 use engine::Sequential;
-use grid::twodim::SquareGrid;
+use grid::twodim::TwodimGrid;
 use grid::nhood::MooreNhood;
 
 /// Implementation of Conway's Game of Life.
@@ -140,7 +140,7 @@ impl Consumer for SpinnerTestConsumer {
 fn test_game_of_life() {
 
     let nhood = MooreNhood::new();
-    let mut grid: SquareGrid<Life, _> = SquareGrid::new(3, 3, nhood);
+    let mut grid: TwodimGrid<Life, _> = TwodimGrid::new(3, 3, nhood);
 
     // Should be in default state
     let default_state = LifeState::Dead;
