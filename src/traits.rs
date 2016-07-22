@@ -4,7 +4,7 @@ pub trait EvolutionState {
     fn update(&mut self);
 }
 
-pub trait Cell: Clone + Serialize + Deserialize {
+pub trait Cell: Serialize + Deserialize {
     type Coord: Coord;
     type State: EvolutionState;
 

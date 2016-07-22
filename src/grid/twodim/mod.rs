@@ -15,7 +15,7 @@ pub use self::coord::GridCoord;
 
 
 pub struct TwodimGrid<C, N>
-    where C: Cell,
+    where C: Cell + Clone,
           N: Nhood<Coord = GridCoord>,
 {
     cells: Vec<C>,
@@ -30,7 +30,7 @@ pub struct TwodimGrid<C, N>
 
 
 impl<C, N> TwodimGrid<C, N>
-    where C: Cell,
+    where C: Cell + Clone,
           N: Nhood<Coord = GridCoord>,
 {
     pub fn new(rows: i32, cols: i32, nhood: N, state: C::State) -> Self {
@@ -107,7 +107,7 @@ impl<C, N> TwodimGrid<C, N>
 
 
 impl<C, N> Grid for TwodimGrid<C, N>
-    where C: Cell,
+    where C: Cell + Clone,
           N: Nhood<Coord = GridCoord>,
 {
     type Cell = C;
