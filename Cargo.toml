@@ -3,7 +3,7 @@ name = "celly"
 description = "Cellular automaton library."
 repository = "https://github.com/0nkery/celly"
 license = "MIT"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Dmitry Shlagoff <wessmoke@gmail.com>"]
 
 [dependencies]
