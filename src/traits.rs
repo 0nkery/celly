@@ -8,7 +8,7 @@ pub trait Cell: Clone + Serialize + Deserialize {
     type Coord: Coord;
     type State: EvolutionState;
 
-    fn update<'a, I>(&'a self, neighbors: I, &Self::State) -> Self
+    fn update<'a, I>(&'a mut self, old: &'a Self, neighbors: I, &Self::State)
         where I: Iterator<Item = Option<&'a Self>>;
 
     fn with_coord<C: Coord>(C) -> Self;
