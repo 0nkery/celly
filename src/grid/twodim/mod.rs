@@ -116,15 +116,15 @@ impl<C, N> Grid for TwodimGrid<C, N>
     fn update(&mut self) {
         mem::swap(&mut self.cells, &mut self.old_cells);
 
-        for (cell_no, cell) in self.old_cells.iter().enumerate() {
+        for i in 0..self.cells.len() {
+            unsafe {
+                let ref neighbors = self.neighbors.get_unchecked(i);
+                let neighbors_iter = self.neighbors_iter(&self.old_cells, &neighbors);
 
-            let ref neighbors = self.neighbors[cell_no];
-            let neighbors_iter = self.neighbors_iter(&self.old_cells, &neighbors);
-
-            let mut new_cell = cell.update(neighbors_iter, &self.evolution_state);
-            new_cell.set_coord(cell.coord());
-
-            self.cells[cell_no] = new_cell;
+                let old = self.old_cells.get_unchecked(i);
+                let cell = self.cells.get_unchecked_mut(i);
+                cell.update(old, neighbors_iter, &self.evolution_state);
+            }
         }
 
         self.evolution_state.update();
