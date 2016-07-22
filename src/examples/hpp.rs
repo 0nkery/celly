@@ -74,10 +74,25 @@ impl Direction {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize)]
+struct Particles([bool; 4]);
+
+impl Particles {
+    fn set(&mut self, direction: &Direction, exists: bool) {
+        let index = *direction as usize;
+        self.0[index] = exists;
+    }
+
+    pub fn get(&self, direction: &Direction) -> bool {
+        let index = *direction as usize;
+        self.0[index]
+    }
+}
+
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 struct HPP {
-    particles: [bool; 4],
+    particles: Particles,
     coord: (i32, i32),
 }
 
@@ -86,14 +101,14 @@ impl Cell for HPP {
     type Coord = (i32, i32);
     type State = HPPState;
 
-    fn update<'a, I>(&'a self, neighbors: I, state: &Self::State) -> Self
+    fn update<'a, I>(&'a mut self, old: &'a Self, neighbors: I, state: &Self::State)
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
         match state.stage {
-            Stage::Collision => self.collision(neighbors),
-            Stage::Transport => self.transport(neighbors),
-        }
+            Stage::Collision => self.collision(old, neighbors),
+            Stage::Transport => self.transport(old, neighbors),
+        };
     }
 
     fn with_coord<C: Coord>(coord: C) -> Self {
@@ -107,15 +122,15 @@ impl Cell for HPP {
 
 
 impl HPP {
-    fn collision<'a, I>(&self, neighbors: I) -> Self
+    fn collision<'a, I>(&'a mut self, old: &'a Self, neighbors: I)
         where I: Iterator<Item = Option<&'a Self>>,
     {
-
-        let mut new = HPP::default();
+        let mut new = Particles::default();
 
         let has_head_on = |d: &Direction, op_d: &Direction| {
-            self.particle(&d) && self.particle(&op_d) && !self.particle(&d.perpendicular()) &&
-            !self.particle(&op_d.perpendicular())
+            old.particles.get(&d) && old.particles.get(&op_d) &&
+            !old.particles.get(&d.perpendicular()) &&
+            !old.particles.get(&op_d.perpendicular())
         };
 
         for (neighbor, direction) in neighbors.zip(self.directions().iter()) {
@@ -127,11 +142,11 @@ impl HPP {
 
                     let head_on = has_head_on(&direction, &opposite);
                     if head_on {
-                        new.set_particle(&direction.perpendicular(), true);
-                        new.set_particle(&opposite.perpendicular(), true);
+                        new.set(&direction.perpendicular(), true);
+                        new.set(&opposite.perpendicular(), true);
                     } else {
-                        let exists = new.particle(&direction) || self.particle(&direction);
-                        new.set_particle(&direction, exists);
+                        let exists = new.get(&direction) || old.particles.get(&direction);
+                        new.set(&direction, exists);
                     }
                 },
                 // Rebound
@@ -139,54 +154,48 @@ impl HPP {
                     let opposite = direction.opposite();
                     let head_on = has_head_on(&direction, &opposite);
                     if head_on {
-                        new.set_particle(&direction.perpendicular(), true);
-                        new.set_particle(&opposite.perpendicular(), true);
+                        new.set(&direction.perpendicular(), true);
+                        new.set(&opposite.perpendicular(), true);
                     } else {
-                        if self.particle(&direction) {
-                            new.set_particle(&opposite, true);
+                        if old.particles.get(&direction) {
+                            new.set(&opposite, true);
                         }
                     }
                 },
             }
         }
 
-        new
+        self.particles = new;
     }
 
-    fn transport<'a, I>(&self, neighbors: I) -> Self
+    fn transport<'a, I>(&mut self, old: &'a Self, neighbors: I)
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
-        let mut new = HPP::default();
+        let mut new = Particles::default();
 
         for (neighbor, direction) in neighbors.zip(self.directions().iter()) {
             match neighbor {
                 Some(neighbor) => {
                     let opposite = direction.opposite();
-                    if neighbor.particle(&opposite) {
-                        new.set_particle(&opposite, true);
+                    if neighbor.particles.get(&opposite) {
+                        new.set(&opposite, true);
                     }
                 },
                 None => {
-                    if self.particle(&direction) {
-                        new.set_particle(&direction, true);
+                    if old.particles.get(&direction) {
+                        new.set(&direction, true);
                     }
                 },
             }
         }
 
-        new
+        self.particles = new;
     }
 
-    pub fn particle(&self, direction: &Direction) -> bool {
-        let index = *direction as usize;
-        self.particles[index]
-    }
 
-    fn set_particle(&mut self, direction: &Direction, exists: bool) {
-        let index = *direction as usize;
-        self.particles[index] = exists;
-    }
+
+
 
     #[inline]
     pub fn directions(&self) -> [Direction; 4] {
@@ -225,28 +234,28 @@ fn pretty_print<G: Grid>(grid: &G) {
                 for d in dirs.iter() {
                     let to_print = match *d {
                         Direction::Down => {
-                            if cell.particle(d) {
+                            if cell.particles.get(d) {
                                 " v |"
                             } else {
                                 "   |"
                             }
                         },
                         Direction::Right => {
-                            if cell.particle(d) {
+                            if cell.particles.get(d) {
                                 "> "
                             } else {
                                 "  "
                             }
                         },
                         Direction::Left => {
-                            if cell.particle(d) {
+                            if cell.particles.get(d) {
                                 "<|"
                             } else {
                                 " |"
                             }
                         },
                         Direction::Up => {
-                            if cell.particle(d) {
+                            if cell.particles.get(d) {
                                 " ^ |"
                             } else {
                                 "   |"
@@ -272,17 +281,16 @@ struct HPPRulesTestConsumer;
 impl HPPRulesTestConsumer {
     pub fn new() -> Self { HPPRulesTestConsumer }
 
-    fn particles_count<C: Cell>(&self, cells: &Vec<C>, direction: &Direction) -> i32 {
+    fn particles_count(&self, cells: &Vec<HPP>, direction: &Direction) -> i32 {
 
         cells.iter()
-            .map(|c| to_cell(c))
-            .filter(|c: &HPP| c.particle(direction) == true)
+            .filter(|c| c.particles.get(direction) == true)
             .count() as i32
     }
 
 
 
-    fn test_collision<G: Grid>(&self, grid: &G) {
+    fn test_collision<G: Grid<Cell = HPP>>(&self, grid: &G) {
         println!("Collision");
 
         let left_particle_count = self.particles_count(&grid.cells(), &Direction::Left);
@@ -298,30 +306,32 @@ impl HPPRulesTestConsumer {
         assert_eq!(down_particles_count, 1);
 
         let rebound_to_right = find_cell(&grid.cells(), 0, 1);
-        assert_eq!(rebound_to_right.particle(&Direction::Right), true);
+        assert_eq!(rebound_to_right.particles.get(&Direction::Right), true);
 
         let head_on_up = find_cell(&grid.cells(), 1, 0);
-        assert_eq!(head_on_up.particle(&Direction::Up), true);
+        assert_eq!(head_on_up.particles.get(&Direction::Up), true);
 
         let head_on_down = find_cell(&grid.cells(), 1, 0);
-        assert_eq!(head_on_down.particle(&Direction::Down), true);
+        assert_eq!(head_on_down.particles.get(&Direction::Down), true);
     }
 
-    fn test_transport<G: Grid>(&self, grid: &G) {
+    fn test_transport<G: Grid<Cell = HPP>>(&self, grid: &G) {
         println!("Transport");
 
         let simple_move_to_right = find_cell(&grid.cells(), 1, 2);
-        assert_eq!(simple_move_to_right.particle(&Direction::Right), true);
+        assert_eq!(simple_move_to_right.particles.get(&Direction::Right), true);
 
         let move_to_right_after_rebound = find_cell(&grid.cells(), 1, 2);
-        assert_eq!(move_to_right_after_rebound.particle(&Direction::Right),
+        assert_eq!(move_to_right_after_rebound.particles.get(&Direction::Right),
                    true);
 
         let move_to_down_after_head_on = find_cell(&grid.cells(), 1, 1);
-        assert_eq!(move_to_down_after_head_on.particle(&Direction::Down), true);
+        assert_eq!(move_to_down_after_head_on.particles.get(&Direction::Down),
+                   true);
 
         let fixed_to_up_after_head_on = find_cell(&grid.cells(), 1, 0);
-        assert_eq!(fixed_to_up_after_head_on.particle(&Direction::Up), true);
+        assert_eq!(fixed_to_up_after_head_on.particles.get(&Direction::Up),
+                   true);
     }
 }
 
@@ -350,9 +360,9 @@ fn test_rules() {
     // 3x3 grid with 4 particles. There should be
     // one rebound, head-on collision and simple move.
 
-    let left_particle = [false, false, true, false];
-    let right_particle = [false, true, false, false];
-    let about_to_collide = [false, true, true, false];
+    let left_particle = Particles([false, false, true, false]);
+    let right_particle = Particles([false, true, false, false]);
+    let about_to_collide = Particles([false, true, true, false]);
 
     let cells = vec![
         HPP { particles: about_to_collide, coord: (1, 0) },
@@ -369,8 +379,7 @@ fn test_rules() {
 
     let right_particles_count = grid.cells()
         .iter()
-        .map(|c| to_cell(c))
-        .filter(|c: &HPP| c.particle(&Direction::Right) == true)
+        .filter(|c| c.particles.get(&Direction::Right) == true)
         .count();
     assert_eq!(right_particles_count, 2);
 
@@ -393,15 +402,14 @@ impl HPPSpreadTestConsumer {
         }
     }
 
-    fn particles_count<C: Cell>(&self, cells: &Vec<C>, direction: &Direction) -> i32 {
+    fn particles_count(&self, cells: &Vec<HPP>, direction: &Direction) -> i32 {
 
         cells.iter()
-            .map(|c| to_cell(c))
-            .filter(|c: &HPP| c.particle(direction) == true)
+            .filter(|c| c.particles.get(direction) == true)
             .count() as i32
     }
 
-    fn test_collision<G: Grid>(&mut self, grid: &G) {
+    fn test_collision<G: Grid<Cell = HPP>>(&mut self, grid: &G) {
         println!("Collision");
 
         if self.cur_y == 0 {
@@ -419,7 +427,7 @@ impl HPPSpreadTestConsumer {
         }
     }
 
-    fn test_transport<G: Grid>(&mut self, grid: &G) {
+    fn test_transport<G: Grid<Cell = HPP>>(&mut self, grid: &G) {
         println!("Transport");
 
         let particles_count = self.particles_count(&grid.cells(), &self.cur_direction);
@@ -428,9 +436,8 @@ impl HPPSpreadTestConsumer {
 
         assert!(grid.cells()
             .iter()
-            .map(|c| to_cell(c))
-            .filter(|c: &HPP| c.coord().y() == self.cur_y)
-            .all(|c| c.particle(&self.cur_direction) == true));
+            .filter(|c| c.coord().y() == self.cur_y)
+            .all(|c| c.particles.get(&self.cur_direction) == true));
 
         if self.cur_y == 4 {
             self.cur_direction = Direction::Up;
@@ -465,7 +472,7 @@ fn test_spread() {
     // 5x5 grid with 5 particles. Particles should move
     // to lower border then rebound, then move to upper and so on.
 
-    let down_particle = [false, false, false, true];
+    let down_particle = Particles([false, false, false, true]);
 
     let mut cells = Vec::new();
     for x in 0..5 {

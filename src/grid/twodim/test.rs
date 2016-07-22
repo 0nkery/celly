@@ -15,7 +15,7 @@ impl Cell for MooreTestCell {
     type Coord = (i32, i32);
     type State = EmptyState;
 
-    fn update<'a, I>(&self, neighbors: I, _: &Self::State) -> Self
+    fn update<'a, I>(&'a mut self, _: &'a Self, neighbors: I, _: &Self::State)
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
@@ -40,8 +40,6 @@ impl Cell for MooreTestCell {
         assert_eq!(total, 8);
         assert_eq!(none_cnt, 5);
         assert_eq!(neighbors_cnt, 3);
-
-        self.clone()
     }
 
     fn with_coord<C: Coord>(coord: C) -> Self { MooreTestCell { coord: (coord.x(), coord.y()) } }

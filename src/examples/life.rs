@@ -56,21 +56,17 @@ impl Cell for Life {
     type Coord = (i32, i32);
     type State = EmptyState;
 
-    fn update<'a, I>(&self, neighbors: I, _: &Self::State) -> Self
+    fn update<'a, I>(&'a mut self, old: &'a Self, neighbors: I, _: &Self::State)
         where I: Iterator<Item = Option<&'a Self>>,
     {
-
         let alive_count = self.alive_count(neighbors);
 
-        let new_state = match self.state {
+        let new_state = match old.state {
             LifeState::Alive => self.alive_state(alive_count),
             LifeState::Dead => self.dead_state(alive_count),
         };
 
-        let mut new_cell = self.clone();
-        new_cell.state = new_state;
-
-        new_cell
+        self.state = new_state;
     }
 
     fn with_coord<C: Coord>(coord: C) -> Self {
@@ -88,6 +84,37 @@ impl Cell for Life {
 
 use test_helpers::to_cell;
 
+
+fn find_cell(cells: &Vec<Life>, x: i32, y: i32) -> Life {
+
+    assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
+
+    cells.iter()
+        .find(|c| c.coord().x() == x && c.coord().y() == y)
+        .unwrap()
+        .clone()
+}
+
+
+fn pretty_print<G: Grid<Cell = Life>>(grid: &G) {
+    let dims = grid.dimensions();
+
+    println!("");
+
+    for y in 0..dims.y() {
+        for x in 0..dims.x() {
+            let cell = find_cell(grid.cells(), x, y);
+            match cell.state {
+                LifeState::Dead => print!("D |"),
+                LifeState::Alive => print!("A |"),
+            };
+        }
+        println!("");
+    }
+
+    println!("");
+}
+
 struct SpinnerTestConsumer {
     vertical: bool,
 }
@@ -101,8 +128,10 @@ impl SpinnerTestConsumer {
 impl Consumer for SpinnerTestConsumer {
     type Cell = Life;
 
-    fn consume<G: Grid>(&mut self, grid: &mut G) {
+    fn consume<G: Grid<Cell = Self::Cell>>(&mut self, grid: &mut G) {
         assert_eq!(grid.cells().len(), 9);
+
+        pretty_print(grid);
 
         let dead_cells_count = grid.cells()
             .iter()
@@ -164,6 +193,8 @@ fn test_game_of_life() {
                      }];
 
     grid.set_cells(cells);
+
+    pretty_print(&grid);
 
     let consumer = SpinnerTestConsumer::new();
     let mut engine = Sequential::new(grid, consumer);
