@@ -30,11 +30,18 @@ pub trait Nhood {
     fn neighbors_count(&self) -> usize;
 }
 
+/// Basic coordinate with three components.
+/// This crate is used for creating automata
+/// on 2D grids for now, so `z` has default impl.
 pub trait Coord: Clone + Serialize + Deserialize {
+    /// Build coord from any other representation of coord.
     fn from_2d(x: i32, y: i32) -> Self;
 
+    /// Returns `x` component.
     fn x(&self) -> i32;
+    /// Returns `y` component.
     fn y(&self) -> i32;
+    /// Returns `z` component.
     fn z(&self) -> i32 { 0 }
 }
 
