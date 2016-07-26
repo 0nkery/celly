@@ -23,10 +23,15 @@ pub trait Cell: Serialize + Deserialize {
     fn set_coord<C: Coord>(&mut self, &C);
 }
 
+/// Represents neighborhood for automata.
 pub trait Nhood {
+    /// Coords this nhood supports.
     type Coord: Coord;
 
+    /// Method returns for any given coord
+    /// coordinates of surrounding neighbors.
     fn neighbors(&self, &Self::Coord) -> Vec<Self::Coord>;
+    /// Hint for grid.
     fn neighbors_count(&self) -> usize;
 }
 
