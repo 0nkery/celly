@@ -12,6 +12,3 @@ pub mod traits;
 mod utils;
 
 mod examples;
-
-#[cfg(test)]
-mod test_helpers;
