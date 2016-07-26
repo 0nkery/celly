@@ -51,9 +51,14 @@ pub trait Grid {
     fn set_cells(&mut self, Vec<Self::Cell>);
 }
 
+/// Interface to the outer world.
 pub trait Consumer {
+    /// Cells supported by this consumer. Helps
+    /// to use cells from grid directly if grid
+    /// has the same cell in it.
     type Cell: Cell;
 
+    /// Called once when all cells has been updated.
     fn consume<G>(&mut self, &mut G)
         where G: Grid<Cell = Self::Cell>;
 }
