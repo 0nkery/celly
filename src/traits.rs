@@ -58,6 +58,7 @@ pub trait Consumer {
         where G: Grid<Cell = Self::Cell>;
 }
 
+/// Interlayer between grid and consumer(s).
 pub trait Engine {
     fn run_times(&mut self, i64);
 }
