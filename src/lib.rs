@@ -10,7 +10,7 @@
 //! Engine runs grid evolution in some way and passes
 //! updates to so-called consumers.
 //!
-//! Consumers are interface parts to outer world.
+//! Consumers are interface to outer world.
 //! They can be GUI, Web or simple file writers.
 
 extern crate serde;
