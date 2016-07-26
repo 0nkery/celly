@@ -4,7 +4,7 @@
 
 //! Library for building cellular automata.
 //!
-//! Cellular automata made by supplying some cell to
+//! Cellular automaton is made by supplying some cell to
 //! grid and "engine". Grid stores all cells, chooses
 //! how to iterate them, how to split itself etc.
 //! Engine runs grid evolution in some way and passes
