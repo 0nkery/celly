@@ -6,3 +6,5 @@
 (https://clippy.bashy.io/github/0nkery/celly/master/log)
 [![Crates.io](https://img.shields.io/crates/v/celly.svg?maxAge=2592000?style=flat-square)]
 (https://crates.io/crates/celly)
+
+[Documentation](http://0nkery.github.io/celly/celly/index.html)
