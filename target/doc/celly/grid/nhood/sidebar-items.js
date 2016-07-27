@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MooreNhood","Implements Moore neighborhood. 0 | 1 | 2 3 | x | 4 5 | 6 | 7 x - given coord. Neighbors is numbered in order they returned."],["VonNeumannNhood","Implements Von Neumann neighborhood. - | 0 | - 1 | x | 2 - | 3 | - x - given coord. Neighbors is number in order they returned."]]});
