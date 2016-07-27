@@ -1,7 +1,9 @@
+//! Interfaces on which this library is built.
+
 use serde::{Deserialize, Serialize};
 
 /// Trait represents global state of the
-/// entire simulation which can updated
+/// entire simulation which can be updated
 /// independently from any particular cell.
 /// Consider to store there as much as you can
 /// because this data will be created only once
