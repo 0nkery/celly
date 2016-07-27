@@ -4,12 +4,14 @@ use traits::Nhood;
 use traits::Coord;
 
 
+/// Implements Von Neumann neighborhood.
 pub struct VonNeumannNhood<C: Coord> {
     phantom: PhantomData<C>,
 }
 
 
 impl<C: Coord> VonNeumannNhood<C> {
+    /// Just constructor.
     pub fn new() -> Self { VonNeumannNhood { phantom: PhantomData } }
 }
 
