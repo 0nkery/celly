@@ -1,3 +1,5 @@
+//! Module contains implemented grids and neighorhoods.
+
 pub mod twodim;
 pub mod nhood;
 
