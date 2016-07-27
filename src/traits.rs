@@ -50,16 +50,32 @@ pub trait Coord: Clone + Serialize + Deserialize {
     fn z(&self) -> i32 { 0 }
 }
 
+/// Grid stores cells and updates them. Also
+/// grid contains global evolution state.
 pub trait Grid {
+    /// Grid wants to work with them.
     type Cell: Cell;
+    /// Grid knows how to work with them.
     type Coord: Coord;
 
+    /// One step in evolution.
     fn update(&mut self);
 
+    /// Getter for evolution state.
     fn state(&self) -> &<<Self as Grid>::Cell as Cell>::State;
+    /// Getter for all cells. It is `Vec` because
+    /// Rust does not have abstract return types for now.
+    /// So custom grids are doomed to use `Vec`s internally.
     fn cells(&self) -> &Vec<Self::Cell>;
+    /// Returns `Coord` with rows and cols counts of grid (2D).
+    /// 3D grids would have more dimensions.
     fn dimensions(&self) -> Self::Coord;
 
+    /// This method gives an ability to change grid externally.
+    /// It could be done from consumer, for example
+    /// (consider an app where you reacting to user input),
+    /// or from engine (consider distributed engine received
+    /// updates from nodes).
     fn set_cells(&mut self, Vec<Self::Cell>);
 }
 
