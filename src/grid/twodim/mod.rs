@@ -1,3 +1,5 @@
+//! 2D grid with neighbors iter and custom internal coordinate.
+
 mod iter;
 mod coord;
 mod test;
@@ -14,6 +16,11 @@ use self::iter::Iter;
 pub use self::coord::GridCoord;
 
 
+/// 2D grid. Implemented with two buffers.
+/// They are swapped on every evolution step.
+/// Old buffer is used for read-only neighbors data.
+/// New buffer is writable and mutated through update
+/// process.
 pub struct TwodimGrid<C, N>
     where C: Cell + Clone,
           N: Nhood<Coord = GridCoord>,
@@ -33,6 +40,8 @@ impl<C, N> TwodimGrid<C, N>
     where C: Cell + Clone,
           N: Nhood<Coord = GridCoord>,
 {
+    /// Constructs TwodimGrid with given ROWSxCOLS, neighborhood
+    /// strategy and initial evolution state.
     pub fn new(rows: i32, cols: i32, nhood: N, state: C::State) -> Self {
 
         let len = (rows * cols) as usize;
@@ -100,7 +109,7 @@ impl<C, N> TwodimGrid<C, N>
     }
 
     #[inline]
-    pub fn offset<Crd: Coord>(&self, coord: &Crd) -> usize {
+    fn offset<Crd: Coord>(&self, coord: &Crd) -> usize {
         (coord.y() * self.cols + coord.x()) as usize
     }
 }
