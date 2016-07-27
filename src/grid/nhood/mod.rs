@@ -1,3 +1,5 @@
+//! Module contains several implemented neighborhoods.
+
 mod moore;
 mod von_neumann;
 
