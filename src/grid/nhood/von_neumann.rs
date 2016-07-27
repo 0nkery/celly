@@ -5,6 +5,10 @@ use traits::Coord;
 
 
 /// Implements Von Neumann neighborhood.
+/// - | 0 | -
+/// 1 | x | 2
+/// - | 3 | -
+/// x - given coord. Neighbors is number in order they returned.
 pub struct VonNeumannNhood<C: Coord> {
     phantom: PhantomData<C>,
 }

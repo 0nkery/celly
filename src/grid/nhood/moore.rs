@@ -5,6 +5,10 @@ use traits::Coord;
 
 
 /// Implements Moore neighborhood.
+/// 0 | 1 | 2
+/// 3 | x | 4
+/// 5 | 6 | 7
+/// x - given coord. Neighbors is numbered in order they returned.
 pub struct MooreNhood<C: Coord> {
     phantom: PhantomData<C>,
 }
