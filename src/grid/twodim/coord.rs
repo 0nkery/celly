@@ -1,6 +1,10 @@
 use traits::Coord;
 
 
+/// Coordinate for TwodimGrid. Need for custom coordinate
+/// raises from the fact that grid is using one-dimensional
+/// `Vec` to store cells. This coordinate can be constructed
+/// from offset and grid size.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct GridCoord {
     x: i32,
@@ -9,6 +13,8 @@ pub struct GridCoord {
 
 
 impl GridCoord {
+    /// Constructs GridCoord from given offset (in one-dimensional
+    /// array or `Vec`) and grid size.
     #[inline]
     pub fn from_offset(offset: i32, rows: i32, cols: i32) -> GridCoord {
         let col = offset % cols;

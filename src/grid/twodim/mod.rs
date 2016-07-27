@@ -19,8 +19,8 @@ pub use self::coord::GridCoord;
 /// 2D grid. Implemented with two buffers.
 /// They are swapped on every evolution step.
 /// Old buffer is used for read-only neighbors data.
-/// New buffer is writable and mutated through update
-/// process.
+/// New buffer is writable and mutated through update process.
+/// Grid uses one-dimensional `Vec` to store cells.
 pub struct TwodimGrid<C, N>
     where C: Cell + Clone,
           N: Nhood<Coord = GridCoord>,
