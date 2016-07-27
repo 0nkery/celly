@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Sequential","Engine generic over Cell and Consumer running evolution sequentially."]]});

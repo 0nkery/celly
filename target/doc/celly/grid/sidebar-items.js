@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["nhood","Module contains several implemented neighborhoods."],["twodim","2D grid with neighbors iter and custom internal coordinate."]],"struct":[["EmptyState","Dummy evolution state to be used with cellular automata where this concept is not applicable."]]});
