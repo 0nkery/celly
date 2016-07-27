@@ -11,15 +11,28 @@ pub trait EvolutionState {
     fn update(&mut self);
 }
 
+/// Main trait should be implemented in user's code.
+/// Such structs contain main logic of cellular
+/// automaton. Grids can handle only one cell,
+/// so it should be all-in-one.
 pub trait Cell: Serialize + Deserialize {
+    /// Coords supported by Cell.
     type Coord: Coord;
+    /// Global state of evolution.
     type State: EvolutionState;
 
+    /// This method is called for every instance of Cell
+    /// in grid. Cell can mutate itself. Grid should pass
+    /// neighbors, previous version of this Cell and the 
+    /// global state.
     fn update<'a, I>(&'a mut self, old: &'a Self, neighbors: I, &Self::State)
         where I: Iterator<Item = Option<&'a Self>>;
 
+    /// Constructs Cell with given coord.
     fn with_coord<C: Coord>(C) -> Self;
+    /// Getter for cell's coordinate.
     fn coord(&self) -> &Self::Coord;
+    /// Setter for cell's coordinate.
     fn set_coord<C: Coord>(&mut self, &C);
 }
 
