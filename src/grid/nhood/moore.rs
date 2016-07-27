@@ -4,12 +4,14 @@ use traits::Nhood;
 use traits::Coord;
 
 
+/// Implements Moore neighborhood.
 pub struct MooreNhood<C: Coord> {
     phantom: PhantomData<C>,
 }
 
 
 impl<C: Coord> MooreNhood<C> {
+    /// Just constructor.
     pub fn new() -> Self { MooreNhood { phantom: PhantomData } }
 }
 
