@@ -82,9 +82,6 @@ impl Cell for Life {
 }
 
 
-use test_helpers::to_cell;
-
-
 fn find_cell(cells: &Vec<Life>, x: i32, y: i32) -> Life {
 
     assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
@@ -135,16 +132,14 @@ impl Consumer for SpinnerTestConsumer {
 
         let dead_cells_count = grid.cells()
             .iter()
-            .map(|c| to_cell(c))
-            .filter(|c: &Life| c.state == LifeState::Dead)
+            .filter(|c| c.state == LifeState::Dead)
             .count();
         assert_eq!(dead_cells_count, 6);
 
         let alive_cells = || {
             grid.cells()
                 .iter()
-                .map(|c| to_cell(c))
-                .filter(|c: &Life| c.state == LifeState::Alive)
+                .filter(|c| c.state == LifeState::Alive)
         };
         assert_eq!(alive_cells().count(), 3);
 
@@ -172,8 +167,7 @@ fn test_game_of_life() {
 
     assert!(grid.cells()
         .iter()
-        .map(|c| to_cell(c))
-        .all(|c: Life| c.state == default_state));
+        .all(|c| c.state == default_state));
 
     // Vertical spinner
     // D | A | D

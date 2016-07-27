@@ -204,9 +204,7 @@ impl HPP {
 }
 
 
-use test_helpers::to_cell;
-
-fn find_cell<C: Cell>(cells: &Vec<C>, x: i32, y: i32) -> HPP {
+fn find_cell(cells: &Vec<HPP>, x: i32, y: i32) -> HPP {
 
     assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
 
@@ -214,11 +212,11 @@ fn find_cell<C: Cell>(cells: &Vec<C>, x: i32, y: i32) -> HPP {
         .find(|c| c.coord().x() == x && c.coord().y() == y)
         .unwrap();
 
-    to_cell(found)
+    found.clone()
 }
 
 
-fn pretty_print<G: Grid>(grid: &G) {
+fn pretty_print<G: Grid<Cell = HPP>>(grid: &G) {
     let dim = grid.dimensions();
     let iter_order =
         [vec![Direction::Down], vec![Direction::Right, Direction::Left], vec![Direction::Up]];
