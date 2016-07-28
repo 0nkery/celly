@@ -1,7 +1,9 @@
 language: rust
 rust:
   - nightly
-cache: $HOME/bin
+cache: 
+  directories:
+  - $HOME/bin
 
 addons:
   apt:
