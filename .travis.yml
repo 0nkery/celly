@@ -1,7 +1,7 @@
 language: rust
 rust:
   - nightly
-cache: $HOME/bin/kcov
+cache: $HOME/bin
 
 addons:
   apt:
@@ -19,7 +19,7 @@ after_success: |
   cd kcov-master &&
   mkdir build &&
   cd build &&
-  cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/bin .. &&
+  cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME .. &&
   make &&
   sudo make install &&
   cd ../.. &&
