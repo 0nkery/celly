@@ -16,7 +16,6 @@ pub struct Sequential<C: Cell, G: Grid<Cell = C>, Con: Consumer<Cell = C>> {
 }
 
 impl<C: Cell, G: Grid<Cell = C>, Con: Consumer<Cell = C>> Sequential<C, G, Con> {
-
     /// Constructs engine with given Grid and Consumer.
     pub fn new(grid: G, consumer: Con) -> Self {
         Sequential {

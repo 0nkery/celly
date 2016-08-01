@@ -25,7 +25,7 @@ pub trait Cell: Serialize + Deserialize {
 
     /// This method is called for every instance of Cell
     /// in grid. Cell can mutate itself. Grid should pass
-    /// neighbors, previous version of this Cell and the 
+    /// neighbors, previous version of this Cell and the
     /// global state.
     fn update<'a, I>(&'a mut self, old: &'a Self, neighbors: I, &Self::State)
         where I: Iterator<Item = Option<&'a Self>>;
