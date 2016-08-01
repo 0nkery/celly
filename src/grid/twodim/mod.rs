@@ -35,8 +35,7 @@ pub struct TwodimGrid<C, N>
     dimensions: GridCoord,
     rows: i32,
     cols: i32,
-    pool: Option<Pool>,
-    separate: bool,
+    pool: Pool,
 }
 
 
@@ -45,16 +44,8 @@ impl<C, N> TwodimGrid<C, N>
           N: Nhood<Coord = GridCoord>,
 {
     /// Constructs TwodimGrid with given ROWSxCOLS, neighborhood
-    /// strategy, initial evolution state, threads count and separate flag.
-    ///
-    /// Separate flag means grid will not use thread it's called from.
-    pub fn new(rows: i32,
-               cols: i32,
-               nhood: N,
-               state: C::State,
-               threads: u32,
-               separate: bool)
-               -> Self {
+    /// strategy, initial evolution state, threads count.
+    pub fn new(rows: i32, cols: i32, nhood: N, state: C::State, threads: u32) -> Self {
 
         let len = (rows * cols) as usize;
 
@@ -62,16 +53,7 @@ impl<C, N> TwodimGrid<C, N>
         let old_cells = Vec::with_capacity(len);
         let neighbors = Vec::with_capacity(len);
 
-        let threads = if separate {
-            threads
-        } else {
-            threads - 1
-        };
-        let pool = if threads > 1 {
-            Some(Pool::new(threads))
-        } else {
-            None
-        };
+        let pool = Pool::new(threads);
 
         let mut grid = TwodimGrid {
             cells: cells,
@@ -83,7 +65,6 @@ impl<C, N> TwodimGrid<C, N>
             cols: cols,
             dimensions: GridCoord::from_2d(cols, rows),
             pool: pool,
-            separate: separate,
         };
 
         grid.init();
