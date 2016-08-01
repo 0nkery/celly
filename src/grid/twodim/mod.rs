@@ -45,7 +45,9 @@ impl<C, N> TwodimGrid<C, N>
           N: Nhood<Coord = GridCoord>,
 {
     /// Constructs TwodimGrid with given ROWSxCOLS, neighborhood
-    /// strategy, initial evolution state and threads count.
+    /// strategy, initial evolution state, threads count and separate flag.
+    ///
+    /// Separate flag means grid will not use thread it's called from.
     pub fn new(rows: i32,
                cols: i32,
                nhood: N,
