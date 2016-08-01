@@ -125,14 +125,6 @@ impl<C, N> TwodimGrid<C, N>
         neighbors
     }
 
-    fn neighbors_iter<'b>(&self,
-                          cells: &'b Vec<C>,
-                          neighbors: &'b Vec<Option<usize>>)
-                          -> Iter<'b, C> {
-
-        Iter::new(cells, neighbors, self.nhood.neighbors_count())
-    }
-
     #[inline]
     fn offset<Crd: Coord>(&self, coord: &Crd) -> usize {
         (coord.y() * self.cols + coord.x()) as usize
@@ -153,7 +145,8 @@ impl<C, N> Grid for TwodimGrid<C, N>
         for i in 0..self.cells.len() {
             unsafe {
                 let ref neighbors = self.neighbors.get_unchecked(i);
-                let neighbors_iter = self.neighbors_iter(&self.old_cells, &neighbors);
+                let neighbors_iter =
+                    Iter::new(&self.old_cells, &neighbors, self.nhood.neighbors_count());
 
                 let old = self.old_cells.get_unchecked(i);
                 let cell = self.cells.get_unchecked_mut(i);
