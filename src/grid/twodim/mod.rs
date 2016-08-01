@@ -6,6 +6,8 @@ mod test;
 
 use std::mem;
 
+use scoped_threadpool::Pool;
+
 use traits::Grid;
 use traits::Cell;
 use traits::EvolutionState;
@@ -33,6 +35,8 @@ pub struct TwodimGrid<C, N>
     dimensions: GridCoord,
     rows: i32,
     cols: i32,
+    pool: Pool,
+    separate: bool,
 }
 
 
@@ -41,14 +45,26 @@ impl<C, N> TwodimGrid<C, N>
           N: Nhood<Coord = GridCoord>,
 {
     /// Constructs TwodimGrid with given ROWSxCOLS, neighborhood
-    /// strategy and initial evolution state.
-    pub fn new(rows: i32, cols: i32, nhood: N, state: C::State) -> Self {
+    /// strategy, initial evolution state and threads count.
+    pub fn new(rows: i32,
+               cols: i32,
+               nhood: N,
+               state: C::State,
+               threads: u32,
+               separate: bool)
+               -> Self {
 
         let len = (rows * cols) as usize;
 
         let cells = Vec::with_capacity(len);
         let old_cells = Vec::with_capacity(len);
         let neighbors = Vec::with_capacity(len);
+
+        let threads = if separate {
+            threads
+        } else {
+            threads - 1
+        };
 
         let mut grid = TwodimGrid {
             cells: cells,
@@ -59,6 +75,8 @@ impl<C, N> TwodimGrid<C, N>
             rows: rows,
             cols: cols,
             dimensions: GridCoord::from_2d(cols, rows),
+            pool: Pool::new(threads),
+            separate: separate,
         };
 
         grid.init();
