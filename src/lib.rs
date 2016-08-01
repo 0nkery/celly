@@ -14,6 +14,7 @@
 //! They can be GUI, Web or simple file writers.
 
 extern crate serde;
+extern crate scoped_threadpool;
 #[cfg(test)]
 extern crate bincode;
 
