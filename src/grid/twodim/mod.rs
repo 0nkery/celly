@@ -35,7 +35,7 @@ pub struct TwodimGrid<C, N>
     dimensions: GridCoord,
     rows: i32,
     cols: i32,
-    pool: Pool,
+    pool: Option<Pool>,
     separate: bool,
 }
 
@@ -65,6 +65,11 @@ impl<C, N> TwodimGrid<C, N>
         } else {
             threads - 1
         };
+        let pool = if threads > 1 {
+            Some(Pool::new(threads))
+        } else {
+            None
+        };
 
         let mut grid = TwodimGrid {
             cells: cells,
@@ -75,7 +80,7 @@ impl<C, N> TwodimGrid<C, N>
             rows: rows,
             cols: cols,
             dimensions: GridCoord::from_2d(cols, rows),
-            pool: Pool::new(threads),
+            pool: pool,
             separate: separate,
         };
 
