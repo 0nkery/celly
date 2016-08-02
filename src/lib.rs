@@ -1,5 +1,5 @@
 #![feature(custom_derive, plugin)]
-#![plugin(serde_macros)]
+#![plugin(serde_macros, clippy)]
 #![warn(missing_docs)]
 
 //! Library for building cellular automata.
@@ -15,6 +15,7 @@
 
 extern crate serde;
 extern crate scoped_threadpool;
+
 #[cfg(test)]
 extern crate bincode;
 

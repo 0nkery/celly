@@ -94,7 +94,7 @@ impl<C, N> TwodimGrid<C, N>
         let neighbors_count = self.nhood.neighbors_count();
         let mut neighbors = Vec::with_capacity(neighbors_count);
 
-        for coord in self.nhood.neighbors(coord).iter() {
+        for coord in &self.nhood.neighbors(coord) {
 
             if coord.x() >= 0 && coord.x() < self.cols && coord.y() >= 0 && coord.y() < self.rows {
                 neighbors.push(Some(self.offset(coord)));
@@ -125,9 +125,9 @@ impl<C, N> Grid for TwodimGrid<C, N>
 
         for i in 0..self.cells.len() {
             unsafe {
-                let ref neighbors = self.neighbors.get_unchecked(i);
+                let neighbors = &self.neighbors.get_unchecked(i);
                 let neighbors_iter =
-                    Iter::new(&self.old_cells, &neighbors, self.nhood.neighbors_count());
+                    Iter::new(&self.old_cells, neighbors, self.nhood.neighbors_count());
 
                 let old = self.old_cells.get_unchecked(i);
                 let cell = self.cells.get_unchecked_mut(i);

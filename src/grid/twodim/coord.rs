@@ -1,7 +1,7 @@
 use traits::Coord;
 
 
-/// Coordinate for TwodimGrid. Need for custom coordinate
+/// Coordinate for `TwodimGrid`. Need for custom coordinate
 /// raises from the fact that grid is using one-dimensional
 /// `Vec` to store cells. This coordinate can be constructed
 /// from offset and grid size.
