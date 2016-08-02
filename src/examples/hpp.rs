@@ -128,7 +128,7 @@ impl HPP {
         let mut new = Particles::default();
 
         let has_head_on = |d: &Direction, op_d: &Direction| {
-            old.particles.get(&d) && old.particles.get(&op_d) &&
+            old.particles.get(d) && old.particles.get(op_d) &&
             !old.particles.get(&d.perpendicular()) &&
             !old.particles.get(&op_d.perpendicular())
         };
@@ -140,26 +140,24 @@ impl HPP {
                 Some(_) => {
                     let opposite = direction.opposite();
 
-                    let head_on = has_head_on(&direction, &opposite);
+                    let head_on = has_head_on(direction, &opposite);
                     if head_on {
                         new.set(&direction.perpendicular(), true);
                         new.set(&opposite.perpendicular(), true);
                     } else {
-                        let exists = new.get(&direction) || old.particles.get(&direction);
-                        new.set(&direction, exists);
+                        let exists = new.get(direction) || old.particles.get(direction);
+                        new.set(direction, exists);
                     }
                 },
                 // Rebound
                 None => {
                     let opposite = direction.opposite();
-                    let head_on = has_head_on(&direction, &opposite);
+                    let head_on = has_head_on(direction, &opposite);
                     if head_on {
                         new.set(&direction.perpendicular(), true);
                         new.set(&opposite.perpendicular(), true);
-                    } else {
-                        if old.particles.get(&direction) {
-                            new.set(&opposite, true);
-                        }
+                    } else if old.particles.get(direction) {
+                        new.set(&opposite, true);
                     }
                 },
             }
@@ -183,8 +181,8 @@ impl HPP {
                     }
                 },
                 None => {
-                    if old.particles.get(&direction) {
-                        new.set(&direction, true);
+                    if old.particles.get(direction) {
+                        new.set(direction, true);
                     }
                 },
             }
@@ -204,7 +202,7 @@ impl HPP {
 }
 
 
-fn find_cell(cells: &Vec<HPP>, x: i32, y: i32) -> HPP {
+fn find_cell(cells: &[HPP], x: i32, y: i32) -> HPP {
 
     assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
 
@@ -225,7 +223,7 @@ fn pretty_print<G: Grid<Cell = HPP>>(grid: &G) {
 
     for y in 0..dim.y() {
 
-        for dirs in iter_order.iter() {
+        for dirs in &iter_order {
             print!("|");
             for x in 0..dim.x() {
                 let cell = find_cell(grid.cells(), x, y);
@@ -279,10 +277,10 @@ struct HPPRulesTestConsumer;
 impl HPPRulesTestConsumer {
     pub fn new() -> Self { HPPRulesTestConsumer }
 
-    fn particles_count(&self, cells: &Vec<HPP>, direction: &Direction) -> i32 {
+    fn particles_count(&self, cells: &[HPP], direction: &Direction) -> i32 {
 
         cells.iter()
-            .filter(|c| c.particles.get(direction) == true)
+            .filter(|c| c.particles.get(direction))
             .count() as i32
     }
 
@@ -291,43 +289,43 @@ impl HPPRulesTestConsumer {
     fn test_collision<G: Grid<Cell = HPP>>(&self, grid: &G) {
         println!("Collision");
 
-        let left_particle_count = self.particles_count(&grid.cells(), &Direction::Left);
+        let left_particle_count = self.particles_count(grid.cells(), &Direction::Left);
         assert_eq!(left_particle_count, 0);
 
-        let right_particle_count = self.particles_count(&grid.cells(), &Direction::Right);
+        let right_particle_count = self.particles_count(grid.cells(), &Direction::Right);
         assert_eq!(right_particle_count, 2);
 
-        let up_particles_count = self.particles_count(&grid.cells(), &Direction::Up);
+        let up_particles_count = self.particles_count(grid.cells(), &Direction::Up);
         assert_eq!(up_particles_count, 1);
 
-        let down_particles_count = self.particles_count(&grid.cells(), &Direction::Down);
+        let down_particles_count = self.particles_count(grid.cells(), &Direction::Down);
         assert_eq!(down_particles_count, 1);
 
-        let rebound_to_right = find_cell(&grid.cells(), 0, 1);
+        let rebound_to_right = find_cell(grid.cells(), 0, 1);
         assert_eq!(rebound_to_right.particles.get(&Direction::Right), true);
 
-        let head_on_up = find_cell(&grid.cells(), 1, 0);
+        let head_on_up = find_cell(grid.cells(), 1, 0);
         assert_eq!(head_on_up.particles.get(&Direction::Up), true);
 
-        let head_on_down = find_cell(&grid.cells(), 1, 0);
+        let head_on_down = find_cell(grid.cells(), 1, 0);
         assert_eq!(head_on_down.particles.get(&Direction::Down), true);
     }
 
     fn test_transport<G: Grid<Cell = HPP>>(&self, grid: &G) {
         println!("Transport");
 
-        let simple_move_to_right = find_cell(&grid.cells(), 1, 2);
+        let simple_move_to_right = find_cell(grid.cells(), 1, 2);
         assert_eq!(simple_move_to_right.particles.get(&Direction::Right), true);
 
-        let move_to_right_after_rebound = find_cell(&grid.cells(), 1, 2);
+        let move_to_right_after_rebound = find_cell(grid.cells(), 1, 2);
         assert_eq!(move_to_right_after_rebound.particles.get(&Direction::Right),
                    true);
 
-        let move_to_down_after_head_on = find_cell(&grid.cells(), 1, 1);
+        let move_to_down_after_head_on = find_cell(grid.cells(), 1, 1);
         assert_eq!(move_to_down_after_head_on.particles.get(&Direction::Down),
                    true);
 
-        let fixed_to_up_after_head_on = find_cell(&grid.cells(), 1, 0);
+        let fixed_to_up_after_head_on = find_cell(grid.cells(), 1, 0);
         assert_eq!(fixed_to_up_after_head_on.particles.get(&Direction::Up),
                    true);
     }
@@ -370,14 +368,14 @@ fn test_rules() {
 
     let nhood = VonNeumannNhood::new();
     let evolution_state = HPPState::new();
-    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(3, 3, nhood, evolution_state);
+    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(3, 3, nhood, evolution_state, 1);
     grid.set_cells(cells);
 
     pretty_print(&grid);
 
     let right_particles_count = grid.cells()
         .iter()
-        .filter(|c| c.particles.get(&Direction::Right) == true)
+        .filter(|c| c.particles.get(&Direction::Right))
         .count();
     assert_eq!(right_particles_count, 2);
 
@@ -400,10 +398,10 @@ impl HPPSpreadTestConsumer {
         }
     }
 
-    fn particles_count(&self, cells: &Vec<HPP>, direction: &Direction) -> i32 {
+    fn particles_count(&self, cells: &[HPP], direction: &Direction) -> i32 {
 
         cells.iter()
-            .filter(|c| c.particles.get(direction) == true)
+            .filter(|c| c.particles.get(direction))
             .count() as i32
     }
 
@@ -414,7 +412,7 @@ impl HPPSpreadTestConsumer {
             self.cur_direction = Direction::Down;
         }
 
-        let particles_count = self.particles_count(&grid.cells(), &self.cur_direction);
+        let particles_count = self.particles_count(grid.cells(), &self.cur_direction);
         assert_eq!(particles_count, 5);
 
 
@@ -428,14 +426,14 @@ impl HPPSpreadTestConsumer {
     fn test_transport<G: Grid<Cell = HPP>>(&mut self, grid: &G) {
         println!("Transport");
 
-        let particles_count = self.particles_count(&grid.cells(), &self.cur_direction);
+        let particles_count = self.particles_count(grid.cells(), &self.cur_direction);
         assert_eq!(particles_count, 5);
 
 
         assert!(grid.cells()
             .iter()
             .filter(|c| c.coord().y() == self.cur_y)
-            .all(|c| c.particles.get(&self.cur_direction) == true));
+            .all(|c| c.particles.get(&self.cur_direction)));
 
         if self.cur_y == 4 {
             self.cur_direction = Direction::Up;
@@ -482,7 +480,7 @@ fn test_spread() {
 
     let nhood = VonNeumannNhood::new();
     let evolution_state = HPPState::new();
-    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(5, 5, nhood, evolution_state);
+    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(5, 5, nhood, evolution_state, 1);
     grid.set_cells(cells);
 
     let consumer = HPPSpreadTestConsumer::new();

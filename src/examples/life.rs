@@ -82,7 +82,7 @@ impl Cell for Life {
 }
 
 
-fn find_cell(cells: &Vec<Life>, x: i32, y: i32) -> Life {
+fn find_cell(cells: &[Life], x: i32, y: i32) -> Life {
 
     assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
 
@@ -160,7 +160,7 @@ impl Consumer for SpinnerTestConsumer {
 fn test_game_of_life() {
 
     let nhood = MooreNhood::new();
-    let mut grid: TwodimGrid<Life, _> = TwodimGrid::new(3, 3, nhood, EmptyState);
+    let mut grid: TwodimGrid<Life, _> = TwodimGrid::new(3, 3, nhood, EmptyState, 1);
 
     // Should be in default state
     let default_state = LifeState::Dead;

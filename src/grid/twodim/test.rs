@@ -53,6 +53,6 @@ impl Cell for MooreTestCell {
 #[test]
 fn test_neighbors() {
     let nhood = MooreNhood::new();
-    let mut grid: TwodimGrid<MooreTestCell, _> = TwodimGrid::new(2, 2, nhood, EmptyState);
+    let mut grid: TwodimGrid<MooreTestCell, _> = TwodimGrid::new(2, 2, nhood, EmptyState, 1);
     grid.update();
 }
