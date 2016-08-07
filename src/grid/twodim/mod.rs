@@ -98,7 +98,6 @@ impl<C, N, Es> TwodimGrid<C, N, Es>
         // Init split border indices.
         // Used later in `update` to split `cells` between threads.
         let cells_on_thread = cells_count / self.pool.thread_count();
-        println!("{:?}", cells_on_thread);
         let mut start = 0;
         let mut end = cells_on_thread;
         // Emulating `do-while` loop.
@@ -108,7 +107,6 @@ impl<C, N, Es> TwodimGrid<C, N, Es>
             end = cmp::min(start + cells_on_thread, cells_count);
             end < cells_count
         } {}
-        println!("{:?}", self.parts);
     }
 
     fn get_neighbors(&self, coord: &GridCoord) -> Vec<Option<usize>> {
