@@ -57,6 +57,7 @@ impl<C, N, Es> TwodimGrid<C, N, Es>
         let old_cells = Vec::with_capacity(len);
         let neighbors = Vec::with_capacity(len);
 
+        let threads = cmp::max(threads, 1);
         let pool = Pool::new(threads);
 
         let mut grid = TwodimGrid {
