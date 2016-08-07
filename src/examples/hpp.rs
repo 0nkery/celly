@@ -12,6 +12,7 @@ use traits::Consumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::twodim::TwodimGrid;
+use grid::twodim::GridCoord;
 use utils::find_cell;
 
 
@@ -442,6 +443,32 @@ impl Consumer for HPPSpreadTestConsumer {
 }
 
 
+fn setup_spread_test (rows: u32, cols: i32, threads: u32)
+         -> Sequential<HPP,
+                TwodimGrid<HPP, VonNeumannNhood<GridCoord>, HPPState>,
+                HPPSpreadTestConsumer> {
+
+    let down_particle = Particles([false, false, false, true]);
+
+    let mut cells = Vec::new();
+    for x in 0..cols {
+        cells.push(HPP {
+            particles: down_particle,
+            coord: (x, 0),
+        });
+    }
+
+    let nhood = VonNeumannNhood::new();
+    let evolution_state = HPPState::new();
+    let mut grid: TwodimGrid<HPP, _, _> =
+        TwodimGrid::new(rows, cols as u32, nhood, evolution_state, threads);
+    grid.set_cells(cells);
+
+    let consumer = HPPSpreadTestConsumer::new();
+    Sequential::new(grid, consumer)
+}
+
+
 #[test]
 fn test_spread() {
     // initial          later
@@ -453,23 +480,7 @@ fn test_spread() {
     // 5x5 grid with 5 particles. Particles should move
     // to lower border then rebound, then move to upper and so on.
 
-    let down_particle = Particles([false, false, false, true]);
-
-    let mut cells = Vec::new();
-    for x in 0..5 {
-        cells.push(HPP {
-            particles: down_particle,
-            coord: (x, 0),
-        });
-    }
-
-    let nhood = VonNeumannNhood::new();
-    let evolution_state = HPPState::new();
-    let mut grid: TwodimGrid<HPP, _, _> = TwodimGrid::new(5, 5, nhood, evolution_state, 1);
-    grid.set_cells(cells);
-
-    let consumer = HPPSpreadTestConsumer::new();
-    let mut engine = Sequential::new(grid, consumer);
+    let mut engine = setup_spread_test(5, 5, 1);
     // 2 phases * 10 full cycles = 20 times.
     engine.run_times(20);
 }
