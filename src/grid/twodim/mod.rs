@@ -233,5 +233,5 @@ impl<C, N, Es> Grid for TwodimGrid<C, N, Es>
 
     fn state(&self) -> &<<Self as Grid>::Cell as Cell>::State { &self.evolution_state }
 
-    fn dimensions(&self) -> Self::Coord { self.dimensions.clone() }
+    fn size(&self) -> Self::Coord { self.dimensions.clone() }
 }
