@@ -12,6 +12,10 @@ serde_macros = "0.7"
 clippy = "*"
 scoped_threadpool = "0.1"
 
+
 [dev-dependencies.bincode]
 version = "0.5"
 features = ["serde"]
+
+[dev-dependencies]
+num_cpus = "1.0"

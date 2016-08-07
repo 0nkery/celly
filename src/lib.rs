@@ -1,5 +1,6 @@
 #![feature(custom_derive, plugin)]
 #![plugin(serde_macros, clippy)]
+#![feature(test)]
 #![warn(missing_docs)]
 
 //! Library for building cellular automata.
@@ -18,6 +19,10 @@ extern crate scoped_threadpool;
 
 #[cfg(test)]
 extern crate bincode;
+#[cfg(test)]
+extern crate test;
+#[cfg(test)]
+extern crate num_cpus;
 
 pub mod grid;
 pub mod engine;

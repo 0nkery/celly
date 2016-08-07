@@ -3,6 +3,8 @@
 
 #![cfg(test)]
 
+use test::Bencher;
+
 use traits::Cell;
 use traits::Coord;
 use traits::Grid;
@@ -392,14 +394,14 @@ impl HPPSpreadTestConsumer {
     }
 
     fn test_collision<G: Grid<Cell = HPP>>(&mut self, grid: &G) {
-        println!("Collision");
+        let size = grid.size();
 
         if self.cur_y == 0 {
             self.cur_direction = Direction::Down;
         }
 
         let particles_count = self.particles_count(grid.cells(), &self.cur_direction);
-        assert_eq!(particles_count, 5);
+        assert_eq!(particles_count, size.x());
 
 
         if self.cur_direction == Direction::Down {
@@ -410,10 +412,10 @@ impl HPPSpreadTestConsumer {
     }
 
     fn test_transport<G: Grid<Cell = HPP>>(&mut self, grid: &G) {
-        println!("Transport");
+        let size = grid.size();
 
         let particles_count = self.particles_count(grid.cells(), &self.cur_direction);
-        assert_eq!(particles_count, 5);
+        assert_eq!(particles_count, size.x());
 
 
         assert!(grid.cells()
@@ -421,7 +423,7 @@ impl HPPSpreadTestConsumer {
             .filter(|c| c.coord().y() == self.cur_y)
             .all(|c| c.particles.get(&self.cur_direction)));
 
-        if self.cur_y == 4 {
+        if self.cur_y == size.x() - 1 {
             self.cur_direction = Direction::Up;
         }
     }
@@ -431,10 +433,6 @@ impl Consumer for HPPSpreadTestConsumer {
     type Cell = HPP;
 
     fn consume<G: Grid<Cell = Self::Cell>>(&mut self, grid: &mut G) {
-        assert_eq!(grid.cells().len(), 25);
-
-        pretty_print(grid);
-
         match grid.state().stage {
             Stage::Collision => self.test_transport(grid),
             Stage::Transport => self.test_collision(grid),
@@ -443,7 +441,7 @@ impl Consumer for HPPSpreadTestConsumer {
 }
 
 
-fn setup_spread_test (rows: u32, cols: i32, threads: u32)
+fn setup_spread_test (rows: u32, cols: u32, threads: u32)
          -> Sequential<HPP,
                 TwodimGrid<HPP, VonNeumannNhood<GridCoord>, HPPState>,
                 HPPSpreadTestConsumer> {
@@ -454,14 +452,14 @@ fn setup_spread_test (rows: u32, cols: i32, threads: u32)
     for x in 0..cols {
         cells.push(HPP {
             particles: down_particle,
-            coord: (x, 0),
+            coord: (x as i32, 0),
         });
     }
 
     let nhood = VonNeumannNhood::new();
     let evolution_state = HPPState::new();
     let mut grid: TwodimGrid<HPP, _, _> =
-        TwodimGrid::new(rows, cols as u32, nhood, evolution_state, threads);
+        TwodimGrid::new(rows, cols, nhood, evolution_state, threads);
     grid.set_cells(cells);
 
     let consumer = HPPSpreadTestConsumer::new();
@@ -483,4 +481,13 @@ fn test_spread() {
     let mut engine = setup_spread_test(5, 5, 1);
     // 2 phases * 10 full cycles = 20 times.
     engine.run_times(20);
+}
+
+
+#[bench]
+fn bench_multithread(b: &mut Bencher) {
+    let cpus = ::num_cpus::get();
+    // cpus - 2 showed the best results.
+    let mut engine = setup_spread_test(2000, 2000, (cpus - 2) as u32);
+    b.iter(|| engine.run_times(1));
 }
