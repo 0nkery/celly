@@ -12,6 +12,7 @@ use traits::Consumer;
 use engine::Sequential;
 use grid::nhood::VonNeumannNhood;
 use grid::twodim::TwodimGrid;
+use utils::find_cell;
 
 
 enum Stage {
@@ -198,20 +199,8 @@ impl HPP {
 }
 
 
-fn find_cell(cells: &[HPP], x: i32, y: i32) -> HPP {
-
-    assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
-
-    let found = cells.iter()
-        .find(|c| c.coord().x() == x && c.coord().y() == y)
-        .unwrap();
-
-    found.clone()
-}
-
-
 fn pretty_print<G: Grid<Cell = HPP>>(grid: &G) {
-    let dim = grid.dimensions();
+    let dim = grid.size();
     let iter_order =
         [vec![Direction::Down], vec![Direction::Right, Direction::Left], vec![Direction::Up]];
 

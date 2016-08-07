@@ -8,6 +8,7 @@ use engine::Sequential;
 use grid::twodim::TwodimGrid;
 use grid::nhood::MooreNhood;
 use grid::EmptyState;
+use utils::find_cell;
 
 /// Implementation of Conway's Game of Life.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -82,19 +83,8 @@ impl Cell for Life {
 }
 
 
-fn find_cell(cells: &[Life], x: i32, y: i32) -> Life {
-
-    assert!(cells.iter().any(|c| c.coord().x() == x && c.coord().y() == y));
-
-    cells.iter()
-        .find(|c| c.coord().x() == x && c.coord().y() == y)
-        .unwrap()
-        .clone()
-}
-
-
 fn pretty_print<G: Grid<Cell = Life>>(grid: &G) {
-    let dims = grid.dimensions();
+    let dims = grid.size();
 
     println!("");
 
