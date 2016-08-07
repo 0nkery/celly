@@ -191,10 +191,6 @@ impl HPP {
         self.particles = new;
     }
 
-
-
-
-
     #[inline]
     pub fn directions(&self) -> [Direction; 4] {
         [Direction::Up, Direction::Left, Direction::Right, Direction::Down]
@@ -368,7 +364,7 @@ fn test_rules() {
 
     let nhood = VonNeumannNhood::new();
     let evolution_state = HPPState::new();
-    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(3, 3, nhood, evolution_state, 1);
+    let mut grid: TwodimGrid<HPP, _, _> = TwodimGrid::new(3, 3, nhood, evolution_state, 1);
     grid.set_cells(cells);
 
     pretty_print(&grid);
@@ -480,7 +476,7 @@ fn test_spread() {
 
     let nhood = VonNeumannNhood::new();
     let evolution_state = HPPState::new();
-    let mut grid: TwodimGrid<HPP, _> = TwodimGrid::new(5, 5, nhood, evolution_state, 1);
+    let mut grid: TwodimGrid<HPP, _, _> = TwodimGrid::new(5, 5, nhood, evolution_state, 1);
     grid.set_cells(cells);
 
     let consumer = HPPSpreadTestConsumer::new();

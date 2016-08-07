@@ -23,7 +23,7 @@ struct Life {
 }
 
 impl Life {
-    fn alive_count<'a, I>(&self, neighbors: I) -> i32
+    fn alive_count<'a, I>(&self, neighbors: I) -> u32
         where I: Iterator<Item = Option<&'a Self>>,
     {
 
@@ -31,11 +31,11 @@ impl Life {
                 Some(n) => n.state == LifeState::Alive,
                 None => false,
             })
-            .count() as i32
+            .count() as u32
     }
 
     #[inline]
-    fn dead_state(&self, alive: i32) -> LifeState {
+    fn dead_state(&self, alive: u32) -> LifeState {
         match alive {
             3 => LifeState::Alive,
             _ => LifeState::Dead,
@@ -43,7 +43,7 @@ impl Life {
     }
 
     #[inline]
-    fn alive_state(&self, alive: i32) -> LifeState {
+    fn alive_state(&self, alive: u32) -> LifeState {
         match alive {
             2 | 3 => LifeState::Alive,
             _ => LifeState::Dead,
@@ -160,7 +160,7 @@ impl Consumer for SpinnerTestConsumer {
 fn test_game_of_life() {
 
     let nhood = MooreNhood::new();
-    let mut grid: TwodimGrid<Life, _> = TwodimGrid::new(3, 3, nhood, EmptyState, 1);
+    let mut grid: TwodimGrid<Life, _, _> = TwodimGrid::new(3, 3, nhood, EmptyState, 1);
 
     // Should be in default state
     let default_state = LifeState::Dead;
