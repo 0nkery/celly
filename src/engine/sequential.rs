@@ -27,7 +27,7 @@ impl<C: Cell, G: Grid<Cell = C>, Con: Consumer<Cell = C>> Sequential<C, G, Con> 
 
 
 impl<C: Cell, G: Grid<Cell = C>, Con: Consumer<Cell = C>> Engine for Sequential<C, G, Con> {
-    fn run_times(&mut self, times: i64) {
+    fn run_times(&mut self, times: u64) {
         for _ in 0..times {
             self.grid.update();
             self.consumer.consume(&mut self.grid);

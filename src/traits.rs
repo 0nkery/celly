@@ -109,5 +109,5 @@ pub trait Consumer {
 /// Interlayer between grid and consumer(s).
 pub trait Engine {
     /// Runs evolution fixed number of times.
-    fn run_times(&mut self, i64);
+    fn run_times(&mut self, u64);
 }

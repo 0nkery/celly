@@ -16,13 +16,16 @@ impl GridCoord {
     /// Constructs GridCoord from given offset (in one-dimensional
     /// array or `Vec`) and grid size.
     #[inline]
-    pub fn from_offset(offset: i32, rows: i32, cols: i32) -> GridCoord {
+    pub fn from_offset(offset: u32, rows: u32, cols: u32) -> GridCoord {
         let col = offset % cols;
         let row = (offset - col) / cols;
 
         debug_assert!(row < rows);
 
-        GridCoord { x: col, y: row }
+        GridCoord {
+            x: col as i32,
+            y: row as i32,
+        }
     }
 }
 
