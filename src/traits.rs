@@ -78,10 +78,9 @@ pub trait Grid {
 
     /// Getter for evolution state.
     fn state(&self) -> &<<Self as Grid>::Cell as Cell>::State;
-    /// Getter for all cells. It is `Vec` because
-    /// Rust does not have abstract return types for now.
-    /// So custom grids are doomed to use `Vec`s internally.
-    fn cells(&self) -> &Vec<Self::Cell>;
+    /// Getter for all cells. It should some type that could
+    /// be represented as slice (i.e. `Vec`).
+    fn cells(&self) -> &[Self::Cell];
     /// Returns `Coord` with rows and cols counts of grid (2D).
     /// 3D grids would have more dimensions.
     fn size(&self) -> Self::Coord;

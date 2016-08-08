@@ -231,7 +231,7 @@ impl<C, N, Es> Grid for TwodimGrid<C, N, Es>
         }
     }
 
-    fn cells(&self) -> &Vec<Self::Cell> { &self.cells }
+    fn cells(&self) -> &[Self::Cell] { &self.cells }
 
     fn state(&self) -> &<<Self as Grid>::Cell as Cell>::State { &self.evolution_state }
 
