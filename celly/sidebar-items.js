@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["engine","Module contains different engines which can be used to run evolutions."],["grid","Module contains implemented grids and neighorhoods."],["traits","Interfaces on which this library is built."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["sequential","Most simple engine that runs evolution sequentially. Useful for test purposes and with grids which implemented interior parallelism."]]});

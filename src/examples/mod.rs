@@ -1,2 +1,0 @@
-mod life;
-mod hpp;
