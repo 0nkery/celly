@@ -99,13 +99,14 @@ impl<C, N, Es> TwodimGrid<C, N, Es>
         // Init split border indices.
         // Used later in `update` to split `cells` between threads.
         let cells_on_thread = cells_count / self.pool.thread_count();
-        let mut start = 0;
-        let mut end = cells_on_thread;
+        let mut start;
+        let mut end = 0;
         // Emulating `do-while` loop.
         while {
-            self.parts.push((start as usize, end as usize));
-            start = end + 1;
+            start = end;
             end = cmp::min(start + cells_on_thread, cells_count);
+            self.parts.push((start as usize, end as usize));
+
             end < cells_count
         } {}
     }
